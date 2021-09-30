@@ -2,12 +2,19 @@
 title: "Datenvisualisierung mit ggplot2"
 author: "Sebastian Kuhn"
 date: "4 9 2021"
-#output: html_document
-output: word_document
+output: html_document
+#output: word_document
+#output: pdf_document
+description: "Skript für die Videocast-Reihe zum Thema Datenvisualisierung mit ggplot2"
+tags: ["DataViz", "tutorial", "R", "tidyverse", "ggplot2"]
+editor_options:
+  chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r set options, include=FALSE}
+options(width = 700)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, out.width = "100%",
+                      fig.showtext = TRUE, retina = 1)
 ```
 
 # Datenvisualisierung mit ggplot2 - Videocasts
@@ -15,10 +22,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Inhalt {#inhalt}
 
 * [Datenvisualisierung mit ggplot2 - Teil 1: Grundlagen](#basics)
-+ [Die "Grammar of Graphics"](#grammar)
-+ [Ein erster ggplot-Befehl](#Befehl)
-+ [Literatur, Blogs und schnelle Hilfe](#Hilfe)
-* [Die Datenbasis](#data)
+  + [Die "Grammar of Graphics"](#grammar)
+  + [Ein erster ggplot-Befehl](#Befehl)
+  + [Literatur, Blogs und schnelle Hilfe](#Hilfe)
 
 ## Datenvisualisierung mit ggplot2 - Teil 1: Grundlagen {#basics}
 
