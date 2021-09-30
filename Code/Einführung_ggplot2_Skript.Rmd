@@ -1,0 +1,686 @@
+---
+title: "Einführung in ggplot2"
+author: "Sebastian Kuhn"
+date: "4 9 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Inhalt {#inhalt}
+
+* [Einführung in ggplot: Grundlagen](#basics)
+* [Die "Grammar of Graphics"](#grammar)
+* [Die Datenbasis](#data)
+
+## Einführung in ggplot: Grundlagen {#basics}
+
+Herzlich Willkommen zum ersten Teil einer kleinen Video-Tutorial-Reihe zum Thema "Datenvisualisierung mit `ggplot2`". In diesem ersten Teil der Reihe werden wir uns die grundlegende Funktionsweise des Pakets `ggplot` anschauen und beleiben dazu erstmal auf einer etwas theoretischeren Ebene - aber keine Angst: Praxisbeispiele kommen noch früh genug! Ich glaube allerdings, dass es durchaus sinnvoll ist, sich erstmal einen Überblick über die Grundprinzipien und die Ideen zu verschaffen, die mit `ggplot` verbunden sind. 
+
+Wenn wir damit fertig sind, werde ich Ihnen in den kommenden Videos anhand einiger Beispiele zeigen, wie man Diagramme in `ggplot` Schritt für Schritt aufbaut. Wir starten dabei mit einem Streudiagramm und werden uns später weitere Darstellungsformen und komplexere Grafiken anschauen. Am Ende werden Sie - zumindest hoffe ich das - die Grundprinzipien einer effektiven Datenvisualisierung verstehen und wissen, wie man mit `ggplot` eine breite Palette von Diagrammen erstellen kann.
+
+### Disclaimer
+
+Ich gehe in dieser Einführung davon aus, dass Sie die benötigte Software - also vor allem `R` und `R-Studio` - installiert haben und bereits einige Grundkenntnisse in `R` haben. Zudem sei bereits hier gesagt, dass diese Videoreihe keinen umfassenden Überblick über alle Funktionen von `ggplot` geben kann - vielmehr können wir im Prinzip nur an der Oberfläche kratzen. Auch die Beispiele, die ich Ihnen zeigen werde sind keinesfalls als "Kochrezepte" oder strikte und eindeutige Regelwerke zu verstehen. Wie fast immer bei der Arbeit mit R gibt es bei `ggplot` häufig mehr als einen Weg zum Ziel - und gerade bei der Visualisierung von Daten stehen Ihnen zahllose Möglichkeiten zur Verfügung. Das bedeutet übrigens auch, dass `ggplot` natürlioch viel mehr kann als Ihnen hier zeigen werde. 
+
+Das Ziel des Tutorials ist es, dass Sie schnell einen Eindruck von der Funktionalität von ggplot bekommen und schnellt selbst loslegen können, Plots zu erstellen. Sie sollten am Ende der Reihe dazu in der Lage sein, einen `ggplot`-Code im Prinzip zu verstehen, wenn Sie ihn sehen. Sie werden vor allem einen Blick dafür bekommen, wie die "Grammatik" von `ggplot` funktioniert, wie die verschiedenen Ebenen, Formen und Daten zusammengesetzt werden und wie Abbildungen in ggplot Schritt für Schritt aufgebaut werden. 
+
+Und noch ein Hinweis: Haben Sie keinen zu großen Respekt vor kompliziert aussehenden Codes - seien Sie sich versichert, dass die wenigsten Menschen, die praktisch mit `ggplot` ihre Codes auswendig und fehlerfrei herunterschreiben können. Natürlich wird bei der Erstellung von schicken Grafiken mit `ggplot` andauernd gegoogelt und auf Cheat-Sheets gespickelt - und das ist auch okay so. Ganz im Gegenteil sogar: Im Netz findet sich eine sehr aktive Community, die zahlreiche Tipps und Tricks zu `ggplot` teilt und auch häufig die Codes und Daten für unglaublich tolle Darstellungen zur Verfügung stellt. Nutzen Sie diese Möglichkeiten und seien Sie kreativ!  
+
+## Die "Grammar of Graphics" {#grammar}
+
+So, jetzt kommen wir aber - endlich - mal zum Punkt und schauen uns das Paket `ggplot2` einmal an. `ggplot` gehört zu der `tidyverse`-Familie, die eine Reihe sehr nützlicher Pakete aus dem Umfeld der `R-Studio`-Entwickler beinhaltet. Ursprünglich wurde `ggplot` von Hadley Wickham im Jahr 2005 entwickelt. Wickham hat sich dabei von dem Konzept der Grammar of Graphics inspirieren lassen, das Ende der 1990er Jahre von Leland Wilkinson entwickelt wurde. Das zeigt sich übrigens auch schon am Namen des Pakets, da die beiden "g" in `ggplot` eben für "grammar" und "grpahics" stehen. 
+
+Ich will nicht zu sehr ins Detail gehen, es macht aber durchaus Sinn, sich den Grundgedanken der "Grammar of Graphics" an der Stelle einmal anzuschauen. Die Idee von Wilkinson besteht darin, eine ‘Grammatik’ für Grafiken zu entwickeln. Vielleicht fragen Sie sich jetzt, was "Grammatik" mit Grafiken zu tun hat. Nun, in der Sprache stellt die die Grammatik letztlich der systematischen Bescchreibung von Sprache und sie stellt im Prinzip ein Regelwerk zur Verwednung der Sprache zur Verfügung. Beherrscht man dieses Regelwerk, dann sind (mehr oder weniger) sinnvolle sprachliche Aussagen möglich. Analog dazu soll die "Grammar of Graphics" eine Art Sammlung von Konzepten und Regeln darstellen, aus denen wir im Prinzip alle denkbaren und sinnvollen Grafiken und Datenvisualisierungen erstellen können. In seinem - übrigens sehr lesenswerten - Aufsatz zu den Grundlagen von `ggplot` schreibt Wickham selbst, dass diese Grammatik die Grundlage zur Erstellung von graphischen "Gedichten" darstellt. 
+
+Schauen wir uns nun einmal die Bestandteile dieser Grammatik genauer an. In der Pyramide links sehen sie die wichtigsten Elemente dieser Grammatik - und das Besondere an dieser Grammatik ist nun, dass Sie mit Hilfe dieser Komponenten so ziemlich jede erdenkliche statistische Grafik beschreiben können - und mit `ggplot` können Sie sie entsprechend auch erstellen. 
+
+### Data
+Ganz unten in der Pyramide finden sich die Daten - und klar, ohne Daten gäbe es nicht, was Sie visualisieren könnten. Daten alleine helfen aber noch nicht viel - vielmehr müssen Sie irgendwie festlegen, welche Variablen aus Ihren Daten in welcher Form abgebildet werden sollen. Und hiermit ist das Aesthetics-Element der Grammar of Graphics angesprochen.  
+
+### Aesthetics
+Mit ästhetischen-Funktionen verlinken Sie in `ggplot` Ihre Vairbalne mit bestimmten ästhetischen Darstellungen in der Grafik - sie legen beispielsweise fest, welche Variablen auf der x- oder y-Achse dargestellt werden oder ob Ihre Variablen mit bestimmten Farben in der Darstellung verbunden werden sollen. Weil es hier alsoum die logische Verbindungen zwischen Ihren Daten und den sichtbaren Elementen in Ihrer Darstellung geht, wird hier häufig von "aesthetic mapping" gesprochen. 
+
+### Scale
+Sobald klar ist, welche Daten für eine Visualisierung verwendet werden sollen, muss auch die Skalierung festgelegt werden. Wenn wir hier von Skalen oder Skalierung sprechen meinen wir besipielsweise die Wertebereiche der x- und y-Achsen. So macht es beispielsweise keinen Sinn eine Zeitachse von 1800 bis 2020 darzustellen, wenn Sie nur Daten aus den Jahren 2010 bis 2020 verwenden wollen. Mit der Skalierung sind aber auch Farb- oder Größenskalen und zahlreiche andere Eigenschaften und Parameter gemeint. Das wird vermutlich klarer, wenn wir uns hierzu Beiepiele anschauen. 
+
+### Geometric Objects
+Sobald feststeht, welche Daten in einem Plot dargestellt werden sollen muss natürlich festgelegt werden, in welcher Form die Daten visualisiert werden sollen - ob also beispielsweise eine Punktwolke ("Scatterplot), ein Boxplot oder ein Balkendiagramm erstellt werden soll. Hier sprechen wir dann von geometrischen Objekten bzw. in `ggplot` von `geoms` (oder geomen). Für praktisch alle gängigen Formen von Datenvsualisierungen exisitieren in `ggplot` mittlerweile eigene `geom_`-Funktionen, zum Beispiel erstellt `geom_point()` Streudiagramme, `geom_bar()` erstellt Balkenplots, `geom_boxplot()` erstellt Boxplots und so weiter.
+
+### Statistics
+Als nächstes Element der Grammar of Graphics kommen wir zu statistischen Transformationen. Was ist darunter zu verstehen? Nicht immmer wollen Sie den exakten Wert der jeweiligen Variablen in einer Abbildung darstellen, vielmehr sind Sie ja vielleicht an Mittelwerten, Summen oder Auszählungen interessiert oder wollen beispielsweise den Logarithmus der Werte verwenden. Daher wird in der "Grammar of Graphics" und in `ggplot` die Möglichkeit einer statistischen Transformation offen gelassen. Viele Darstellungen wie z.B. Boxplots oder Histogramme setzen solche statsitischen Transformationen ja mehr oder weniger implizit voraus - bei anderen sind sie eher optional. Wenn keine statistische Transformation vorgenommen wird, ist im Kontext von `ggplot` häufig die Rede von der transformation identity: Dann werden die Daten nicht verändert, sondern direkt aus dem Datensatz an die jeweilige Ästhetik weitergegeben. 
+
+### Facets
+Das nächste Element der Grammatik der Grafik sind die "Facets" - auf Deutsch also so etwas wie eine Facettenspezifikation. Konkret ist hier gemeint, dass die ausgewählten Daten vor der Visualisierung in verschiedene Teil-Datensätze aufgesplittet werden können. Sie könnten z.B. die Entwicklung der Wahlbeteiligung in einem bestimmten Zeitraum für verschiedene Länder in separaten Darstellungen erstellen. In diesem Fall verwenden wir eine Facettenspezifikation, die für jedes Land einen Teildatensatz erstellt.
+
+### Koordinatensystem
+Zuletzt ist für die Erstellung einer Grafik die Festlegung eines bestimmten Koordinatensystems notwendig, das zu den Daten und geometrischen Objekten passt. Am häufigsten wird hier das sogenannte "kartesische" Koordinatensystem verwendet - für viele Darstellungen (beispielsweise für Kuchendiagramme) bieten sich aber auch andere Systeme - wie das polare Koordinatensystem - an.
+
+Nachdem wir nun die wichtigsten Elemente der "Grammar of Graphics" zumindest in den Grundzügen einmal angesprochen haben bliebt nur noch der Hinweis darauf, dass `ggplot`modular aufgebaut ist und sich Schritt für Schritt entwickeln lässt. Sie können sich die einzelnen Elemente eines `ggplot`-Befehls auch als Ebenen vorstellen, die einfach übereinander gelegt werden. 
+
+So, jetzt verstehen Sie vermutlich nur noch Bahnhof und fragen sich vielleicht, warum das alles so kompliziert sein muss. Ja, ich gebe zu, dass das alles erstmal viel und eher trocken erscheint, ich glaube aber, dass Sie sehr davon proftieren werden, wenn sie zumindest ein Gefühl für die Grundidee von `ggplot` haben, bevor Sie richtig loslegen. 
+
+Und zur Beruhigung: `ggplot` wird Ihnen viel Arbeit abnehmen, da hier zahlreiche intelligente Voreinstellungen bzw. default-Werte festgelegt wurden. Mit der Angabe der zu verwendenen Daten, eines sinnvollen Mappings (aesthetics) und der Angabe einer geometrischen Form (geom) verfügt ggplot in aller Regel bereits über genügend Informationen, um ein Diagramm für Sie zu zeichnen. Wenn Sie keine weiteren Angaben mehr machen, verwendet ggplot eine Reihe von sehr sorgfältig festgelegten defaults - oder Voreinstellungen - die in aller Regel zu einem venünftigen und vorzeigbaren Ergebnis führen. Natürlich werden Sie für eine Publikation oder für tiefere Einsichten in aller Regel noch einiges anpassen wollen und müssen - für einen schnellen Einblick in die Daten sind die Voreinstellungen aber in aller Regel ausreichend. 
+
+So, jetzt wirds aber Zeit die Theorie zu verlassen und zur Praxis zu kommen. Vorher will ich noch kurz etwas zu den Daten sagen: 
+
+## Die Datenbasis {#data}
+Im Rahmen dieses Tutorials verwende ich Daten aus dem *Quality of Government*-Datensatz des [Quality of Government Institute](https://www.gu.se/en/quality-government) der Universität Göteborg. Der Fokus des Datensatzes liegt auf *Good Governance* und beinhaltet Mikro- und Makrodaten aus unterschiedlichen Quellen, die für über 190 Länder aufbereitet werden. Die Daten sind dabei thematisch - beispielsweise nach den BEreichen Bildung, Gesundheits, Migration und Umwelt - gegliedert. Der Datensatz liegt in mehreren Varianten vor - so beinhaltet der [Standard-Datensatz](https://www.gu.se/en/quality-government/qog-data/data-downloads/standard-dataset) beispielsweise über 2.000 Varianblen wohingegen der [Basic-Datasatz](https://www.gu.se/en/quality-government/qog-data/data-downloads/basic-dataset) eine kompaktere Version mit nur etwa 300 Variablen darstellt. Darüber hinaus liegen viele Daten auch in einem [Zeitreihendatensatz](https://www.gu.se/en/quality-government/qog-data/data-downloads/standard-dataset) vor. Für dieses Tutorial habe ich einen kleinen Auszug aus dem Standarddatensatz sowie aus dem Zeitreihendatensatz erstellt, der nur einige wenige Variablen enthält.
+
+
+Und jetzt geht's aber wirklich los...
+
+## Praxis I: 
+
+### Empfehlung
+Bevor wir gleich loslegen möchte ich Ihnen dringend empfehlen, alle Übungen die Sie ggf. nebenher machen, auch tatsächlich manuell durchzuführen, indem Sie den Code selbst eintippen (statt ihn zu kopieren und einzufügen). Code selbst einzugeben? Das klingt in Zeiten des "Copy und Paste" vielleicht antiquirt und mühsam, ist aber bei weitem der effektivste Weg, um sich an die Logik von ggplot zu gewöhnen und ein Gefühl für die Syntax von R zu bekommen. Nur wenn Sie selbt Fehler machen - und das werden Sie unweigerlich tun - werden Sie auch schnell in der Lage sein, die eigenen Fehler zu diagnostizieren.
+
+### Der logische Aufbau eines ggplots
+Im ersten Video habe ich viel über die Elemente einer "Grammar of Graphics" gesprochen - jetzt schauen wir uns das mal an. So sieht ein basaler Befehl in der ggplot-Grundstruktur aus:
+
+```{r eval=FALSE}
+# Grundstruktur eines ggplot-Befehls - nicht ausführbar
+
+# ggplot(data = df, aes(x = x, y = y)) +
+#   geom_point()
+```
+
+Um den Befehl zu verstehen lohnt es sich, ihn in gewisser Weise einmal zu "sprechen". Was passiert ist das folgende: Mit der Funktion `ggplot()` teilen Sie R im Prinzip einfach mit, dass Sie jetzt gerne `ggplot` verwenden würden. Die Funktion erwartet als Argument die Angabe des Datensatzes, in dem sich die Variablen befinden, die dargestellt werden sollen. Sie übergeben dieen Datensatz im Argument `data =` (in diesem Fall also einen fiktiven Datensatz namens "df"). Als nächstes legen Sie in der `aes()`-Funktion fest, welche Variablen Sie nun konkret verwenden wollen und stellen das sogenannte "Mapping" zwischen den Daten und Ihrer Abbildung her. In diesem Fall wollen Sie also die fiktive Variable x auf der x-Achse darstellen und die fiktive Variable y auf der y-Achse. Damit haben Sie die Daten und die Ästhetik des Plots festgeleht. Nun muss `ggplot` nur noch wissen, welche Darstellungsform verwendet werden soll. Daher fügen Sie nun mit einem `+` eine `geom_`-Funktion hinzu - in diesem Fall sollen Punkte geplottet werden - es soll also ein Streudiagramm erstellt werden. Ausgeprochen können Sie sich den Befehl so vorstellen:
+
+"Hey ggplot, nimm doch bitte den Datensatz gf, stelle mir die Werte der Variable x auf der x-Achse dar und die Werte der Variable y auf der y-Achse. Bitte zeichne dabei für jede Wertkombination einen Punkt." 
+
+
+
+
+
+
+
+
+
+## ggplots als Objekte speichern
+Sie werden in nahezu allen Lehrbüchern und Blogbeiträgen zu ggplot2 häufig sehen, dass ggplot-Nutzer ihre Grafiken gar nicht sofort direkt erstellen sondern schrittweise vorgehen und Zwischenschritte in Objekte speichern. Das sieht dann beispielsweise häufig so aus:
+
+```{r eval=FALSE}
+p <- ggplot(df, aes(x = x, y = y))
+p + geom_point
+```
+
+Was hier passiert, ist dass die Informationen zum Datensatz ( sowie die Informationen zum Mapping der Variablen x und y (die auf der x- und y-Achse dargestellt werden sollen) in einem neuen Objekt namens "p" zwischenspeichern. Im zweiten Schritt wird dann der Darstellungstyp in der geom-Funktion festgelegt - in diesem Fall also ein Scatterplot. Zwei Punkte sind mir an dieser Stelle wichtig: Erstens die Erkenntnis, dass auch von ggplot erstellte Plots in R als Objekte gespeichert werden können. Zweitens natürlich die Frage nach dem Sinn der Übung. Meistens dient diese Arbeitswesie dazu, herumexperimentieren zu können, ohne immer wieder Code wiederholen zu müssen. Sie könnten beispielswesie auf diese Art schnell ausprobieren, ob sich nun eine Liniendiagramm nicht vielleicht besser zur Darstellung der Daten eignen könnte und Sie können schnellnach Bedarf weitere zusätzliche Ebenen wie angepasste Skalen oder Titel und Beschriftungen hinzufügen. 
+
+```{r eval=FALSE}
+p + geom_line
+```
+
+In den allermeisten Fällen werden Sie übrigens sehen, dass ggploit-Objekte mit "p" bezeichnet werden - natürlich können Sie Ihren Grafik-Objekten auch andere Bezeichnungen geben. "p" hat sich allerdings - vermutlich als Abkürzung für "plot" - hierfür durchgesetzt. 
+
+Wir werden die Gapminder-Daten verwenden, um unsere ersten Diagramme zu erstellen. Stellen Sie dass die Bibliothek, die die Daten enthält, geladen ist. Wenn Sie die Schritte aus dem vorigen Kapitel in derselben RStudio-Sitzung oder demselben RMarkdown-Dokument durcharbeiten, müssen Sie sie nicht erneut laden. Andernfalls, verwenden Sie library(), um sie verfügbar zu machen.
+
+```{r cars}
+library(tidyverse)
+library(here)
+
+# QOG Standard_Datensatz
+qog <- readr::read_csv("/home/seba/Dokumente/R Projekte/ggplot_tut/Data/qog_std_cs_jan21.csv")
+# QOG Zeitreihen-Datensatz
+qog_ts <- readr::read_csv("/home/seba/Dokumente/R Projekte/ggplot_tut/Data/qog_std_ts_jan21.csv")
+
+
+```
+
+Nehmen wir an, wir wollen die Lebenserwartung gegen die staatlichen Gesundheitsausgaben für alle Länder darstellen, die für die im Standarddatensatz Daten verfügbar sind. Zu diesem Zweck erstellen wir ein Objekt das einige der erforderlichen Informationen enthält, und bauen diesen Plot dann Stück für Stück auf. Zunächst müssen wir der Funktion ggplot() mitteilen, welche Daten wir verwenden.
+
+
+```{r}
+p <- ggplot(data = qog)
+```
+
+Zu diesem Zeitpunkt kennt ggplot unsere Daten, aber weiß noch nicht, welche Variablen wir auf welche Weise darstellen wollen. Entsprechend führt ein Abruf des Objekts "p" auch nur zu einem leeren, weißen Feld: 
+
+```{r}
+p
+```
+
+Wir müssen ggplot also logischerweise erst einmal mitteilen, welche Variablen in den Daten durch welche visuellen Elemente im Diagramm dargestellt werden sollen. Diese Zuordnung erfolt - wie bereits angedeutet - über die aes()-Funktion, die sich in aller Regel sofort an die Angabe des Datensatzes anschließt - und zwar in etwa so:
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp))
+```
+
+Hier haben wir der ggplot()-Funktion also zwei Argumente gegeben: Erstens sagen wir ggplot welcher Datensatz verwendet werden soll und wo die Variablen zu finden sind, die im Zusammenhang des Plots verwendet werden sollen. Zwar können in einer ggplot-Darstellung durchaus auch zwei oder mehr Datensätze verwendet werden, in aller Regel finden sich aber alle Variablen in einem Datensatz. 
+
+Als nächstes folgt das sogenannte "Mapping-Argument", das innerhalb der aes()-Funktion angegeben wird. Die Argumente, die wir der Funktion aes() übergeben, sind im Prinzip nichts anderes als Definitionen, die ggplot später verwenden wird. Im vorliegenden Fall könnte man den Codeschnipsel folgendermaßen übersetzen:
+
+"Nimm bitte den Datensatz "qog" zur Hand und stelle die Variable "wdi_dgovhexp" auf der x-Achse und die Variable "wdi_lifexp" auf der y-Achse dar". Wie wir später noch sehen werden, könnnten wir Variablen hier auch zu anderen ästhetischen Elementen zuordnen - beispielsweise zu Farben, Formen oder Linientypen. 
+
+Was passiert, wenn wir an dieser Stelle einfach p in die Konsole eingeben und Return drücken?
+
+```{r}
+p
+```
+
+Wie Sie sehen, ist die Ausgabe nun nicht mehr vollständig weiß, sondern R hat bereits die x- und y-Achse erstellt und beschriftet und eine grundlegende Design-Entscheidung bezüglich des Hintergrunds und einiger Hilfslinien getroffen - und das alles ohne eine konkrete Aufforderung im ggplot-Code. Das liegt daran, dass für diese Ebenen bereits Voreinstellungen definiert wurden, die nun standardmäßig abgerufen werden. Das wichtigste aber - nämlich die Darstellung der beiden Variablen - fehlt noch. Das liegt schlicht und ergreifend daran, dass das Mapping alleine noch nichts darüber sagt, wie die Darstellung genau erfolgen soll - ob also Punkte, Balken, Linien oder andere geometrische Objekte gezeichnet werden sollen. Wir müssen dem Plot daher noch mindestens eine weitere Ebene hinzufügen, die über die Art des Diagramms entscheidet. Konkret bedeutet das, dass wir uns für eine der knapp 50 vordefinierten geom_-Funktion entscheiden müssen. In diesem Fall verwenden wir geom_point() - ohne Angabe weiterer Argeumente. Durch die bereits vorab definierte Zuordnung der jeweiligen Variablen zu den x- und y-Achsen ist hier bereits klar, welche x- und y-Werte in einem Streudiagramm darstellt werden sollen:
+
+```{r}
+p + geom_point()
+```
+
+Und siehe da: Schon ist das erste Streudiagramm fertig! Zugegeben, es sich noch nicht wirklich berauschend aus und würde so vermutlich nicht in einer Studienarbeit oder in einem Journal publiziert werden, der erste Schritt ist aber getan. 
+
+Ich gebe zu, das alles mag für Anfänger etwas kompliziert erscheinen und wir haben jetzt relativ viel Zeit darauf verwendet, ein recht simples Plot zu erstellen - wichtig ist es aber gerade am Anfang das Grundkonzeot von ggplot zu verstehen. Und die gute Nachricht ist nun: An diesem Konzept ändert sich auch bei komplexeren Darstellungen nichts grundsätzliches - sie bestehen nur ebne aus mehr Ebenen. In den Darstellungen, die wir uns im Laufe der weiteren Videos anschauen werden, werden wir beispielsweise andere geom()-Funktionen verwenden, das Koordinatensystem, Skalen, Farben und Beschriftungen ändern - konzeptionell werden wir jedoch immer das Gleiche tun. Deswegen würde ich die zentralen konzeptuellen Schritte bei der Erstellung eines ggplots an der Stelle gerne nochmal wiederholen: 
+
+1. Wir beginnne mit einem möglichst "aufgeräumten" Datensatz und gehen dann wie folgt vor:
+1. Teilen Sie der Funktion ggplot() mit, was unsere Daten sind.
+2. Sagen Sie ggplot(), welche Beziehungen wir sehen wollen. Der Übersichtlichkeit halber der Einfachheit halber werden wir die Ergebnisse der ersten beiden Schritte in ein Objekt namens p .
+3. Sagen Sie ggplot, wie wir die Beziehungen in unseren Daten sehen wollen.
+4. Fügen Sie nach Bedarf Geomodelle hinzu, indem Sie sie einzeln zum Objekt p
+nacheinander hinzufügen.
+5. Verwenden Sie einige Zusatzfunktionen, um Skalen, Beschriftungen, Tick-
+Markierungen, Titel. Wir werden in Kürze mehr über einige dieser Funktionen
+in Kürze.
+
+
+## Weitere geoms
+
+Im letzten Video hatten wir mit dem folgenden Code ein erstes Streudiagramm erstellt:
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp))
+p + geom_point()
+```
+
+Nun wollen wir uns anschauen, wie wir diese Darstellung mit wenigern Schritten anpassen und verändern können. Ein Blick auf das Streudiagramm legt ja durchaus einen Zusammenhang zwischen den beiden verwendeten Variablen nahe. Häufig ist es allerdings nicht ganz so einfach, Muster aus Streudiagrammen abzulesen - vor allem, wenn die Diagramme viele Punkte enthalten, die sich gegenseitig überlagern. Hier sind häufig Trendlinien, Regressionsgeraden oder Glättungslinien hilfreich. Insbesondere bei der Visualisierung und Interpretation von bivariaten Regressionen sind derlei Visualisierungen sehr nützlich. 
+
+In ggplot ist dafür die geometrische Funktion "geom_smooth" vorgesehen, die dem Plot eine Regressionslinie hinzufügt, die das zugrundeliegende Muster in den Daten am besten beschreibt: 
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp))
+p + geom_smooth()
+```
+Wie Sie der Ausgabe entnehmen können, wurden nun keine Punkte mehr gezeichnet sondern eine sogenannte geglättete Linie mitsamt eines  eingefügt, das den Standardfehler für die Linie anzeigt. Allerdings hat ggplot nicht nur eine Linie sondern auch gleich den Vertrauensbereich erstellt, der den Standardfehler für die Linie anzeigt. Ein Blick auf die Meldung in der Konsole gibt darüber hinaus Auskunft darüber, dass für die Berechnung der Linie eine bestimmte Methode verwendet wurde - in diesem Fall wurde als Glättungsverfahren der LOESS-Algorithmus verwendet, der auf einer lokal gewichteten Regressionsfunktion beruht. Da sie ggplot in der funktion "geom_smooth" weder mitgeteilt haben, welche Methode verwendet werden soll, noch das ein Vertauensbereich dargestellt werden soll, muss es sich bei diesen beiden Punkten offenkundig um vordefinierte Standardeinstellungen handeln. Ich hatte ja bereits im letzten Video darauf hingewiesen, dass sich die Entwickler von ggplot sich viele Gedanken über sinnvolle default-Einstellungen gemacht haben, die in vielen Fällen den Bedürfnissen der Nutzern entsprechen und so dazu führen, dass man deutlich weniger Code schreiben muss um zu einem Ergebnis zu kommen. Natürlich können Sie diese defaults aber jederzeit auf Ihre Bedürfnisse anpassen - und zwar indem Sie der geom-Funktion einige Argumente in der Klammer mitgeben. Wollen Sie zum beispiel dass Ihnen ggplot eine Linie auf Basis eines simplen linearen Modells ohne Angabe des Vertrauensbereichs erstellt, dann müssten Sie der geom-Funktion in Klammern die Argumente method = "lm" (für "linear model") und se (für "standard error") = FALSE mitgeben:
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp))
+p + geom_smooth(method = "lm", se = FALSE)
+
+```
+
+Die Linie entspricht nun der Regressionlinie aus einem einfachen linearen Regressionsmodell. Während die Regressionslinie Ihnen dabei helfen kann, Muster aus Ihren Daten zu identifizieren, hat sie natürlich auch einen entscheidenden Nachteil: Sie beschreibt die Punktwolke zwar so genau es im Rahmen der gewählten Methode eben geht, sie Ausreißer und Abweichungen von dieser Linie sind aber nun nicht mehr sichtbar. In diesem Sinne kann es überaus sinnvoll sein, die Linie über die jeweilige Punktwolke zu legen. Nichts einfacher als das - um dies zu tun, fügen Sie Ihrem Befehl einfach die Funktion "geom_point()" wieder hinzu:
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp))
+p + geom_smooth(method = "lm", se = FALSE) +
+  geom_point()
+
+```
+
+Und schon haben Sie beide Informationen in einem Plot. Wenn Sie nun genau hinsehen, sind zwei Interessante Dinge zu beobachten. Erstens können Sie an einigen Stellen erkennen, dass die Linie nicht - wie ich eben angekündigt hatte - ÜBER den Punkten liegt sondern darunter. Das verdeutlicht nochmals die Grundlogik von ggplot2, wonach die Plots aus verschiedenen Ebenen bestehen, die übereinander gelegt werden. Sie können sich die Darstellung wie ein Bild vorstellen: Malen oder zeichnen Sie die Linie vor den Punkten, dann liegen die Punkte zwangsläufig über der Linie. Malen oder zeichnen Sie zuerst die Punkte und dann die Linie, ist es eben andersrum. Tauschen wir also die Reihenfolge einmal durch und verwenden erst "geom_point" und dann "geom_smooth":
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp))
+p + geom_point() +
+  geom_smooth(method = "lm", se = FALSE) 
+
+```
+
+Und schon ist die Linie über den Punkten. Zweitens fällt bei genauerem Hinsehen auf, dass sich die Skalierung verändert hat, nachdem wir wieder die Punkte in das ggplot aufgenommen haben. Schauen wir uns das nochmal an indem wir die Darstellung mit Punkten und Linien neben die Darstellung legen, die nur die Linie enthält. Dafür verwenden wir ein Paket namens "Patchwork", das ich Ihnen in einem späteren Video noch genauer erläutern werde. Für den Augenblick reicht es zu wissen, dass dieses Paket einfach mehrere Plots gleichzeitig über- und nebeneinander darstellen kann. 
+
+```{r}
+library(patchwork)
+p1 <- p + geom_point() +
+  geom_smooth(method = "lm", se = FALSE) 
+p2 <- p + geom_smooth(method = "lm", se = FALSE) 
+
+p1 | p2
+
+```
+Es ist relativ leicht zu erkennen, dass die beiden Darstellungen nicht die selbe Skalierung aufweisen. Links geht die y-Achse beispielsweise von etwas unter 55 bis 90 während sie reechts von knapp unter 65 bis knapp unter 90 reicht. Auch hier sind die vordefinierten Standardeinstellungen von ggplot am Werke, die dafür sorgen, dass die Skalierung mehr oder weniger optimal an die Daten angepasst wird, die im jeweiligen Diagramm verwendet werden. Da in dem Diagramm auf der rechten Seite nur die Linie dargestellt wird und nicht die Punkte, ist es in einer gewissen Weise nicht notwendig, eine breitere Skalierung zu verwenden. Das ist im Prinzip auch okay so, kann allerdings durchaus verwirren - vor allem wenn man, wie hier, mehrere Plots nebeneinander legt. Deswegen muss die Skalierung natürlich auch anpassbar sein - und natürlich ist sie es auch. 
+
+## Scale
+
+Hier kommt nun die "scale()"-Funktion ins Spiel. Berachten Sie, dass wir diese Funktion bisher noch gar nicht verwendet hatten - ggplot hat also ohne jede Aufforderung automatisch eine passende Skalierung gewählt und eine entsprechende Beschriftung eingefügt. 
+Um die Skalierung anzupassen hält ggplot zahlreiche scale-Funktionen bereit - einen Überblick erhalten Sie am einfachsten über die ggplot-Referenz im Internet unter [https://ggplot2.tidyverse.org/reference/] oder indem Sie 
+
+```{r}
+??scale_
+```
+eintippen und sich alle scale-Funktionen des ggplot-Pakets anschauen. Dazu müssen Sie im Hilfe-Fenster zu den entsprechenden ggplot-Funktionen scrollen und können sich dann mit einem Klick weitere Details dazu anschauen. 
+
+Es ist zugegbenermaßen anfangs etwas schwierig, die "richtige" scale()-Funktion für den jeweiligen Bedarf zu finden. Im Prinzip steckt die Lösung aber meistens in der Bezeichnung der jeweiligen Funktionen. Beispielsweise gibt es einige scale_color()-Funktionen, die offenkundig etwas mit den Farbskalen zu tun haben, die in der Abbildung verwendet werden. Dazu kommen wir später noch. Andere Funktionen beziehen sich auf die Größe oder die Form von Objekten (scale_size_... und scale_shape...). Wir wollen in dem Fall aber die x- und y-Achsen anpassen. Hierfür stehen eine Reihe von scale_x_- bzw. scale_y_-Funktionen zur Verfügung. Weil beide Variablen aus unserem Beispiel kontinuerliche Variablen sind, verwenden wir zur Anpassung also die scale_x_continous()-Funktion. Im Falle von kategorialen Variablen würden wir die scale_x_discrete()-Funktion verwenden. Zudem stehen noch weitere Funktionen - zum Beispiel für Datumsformate - zur Verfügung.
+
+Passen wir nun also die Saklierung der x-und y-Achse an. Dafür benötigen wir die Funktionen scale_x_continous() und scale_y_continous(). Mit dem Argument "limits" lassen sich nun die Endpunkte der Skalierung anpassen. Wenn wir beispielsweise wollen, dass beide Achsen einen Wertebereich zwischen 0 und 100 abdecken, dann würden wir folgendermaßen vorgehen:
+
+
+```{r}
+ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) +
+  scale_x_continuous(limits = c(0, 100)) + 
+  scale_y_continuous(limits = c(0, 100)) 
+```
+
+Für unser vorliegendes Beispiel ist eine so breite Skalierung nicht nötig, hier reicht uns ein Wertebereich von 0 bis 13 auf der x-Achse und von 50 bis 90 auf der y-Achse. Wie wir nun erkennen weißen beide Plots - das Punktdiagramm und die Darstellung der Regressionslinie - die selbe Skalierung auf:
+
+```{r}
+
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) 
+
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13)) + 
+  scale_y_continuous(limits = c(50, 90)) 
+
+p + geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(limits = c(0, 13)) + 
+  scale_y_continuous(limits = c(50, 90)) 
+
+```
+Noch deutlicher wird es, wenn wir die beiden Darstellungen wieder nebeneinander legen: 
+
+```{r}
+p1 <- p + geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(limits = c(0, 13)) + 
+  scale_y_continuous(limits = c(50, 90)) 
+
+p2 <- p + geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(limits = c(0, 13)) + 
+  scale_y_continuous(limits = c(50, 90)) 
+
+p1 | p2
+```
+Nun können Sie natürlich nicht nur die Endpiunkte der Skalierung manuell festlegen sondern auch den Intervall, der abgebildet werden soll. Hierfür verwenden Sie das Argument "breaks" innerhalb der scale_continuous-Funktion. Wenn Sie z.B. auf der y-Achse statt des autmatisch ausgewählten 10er-Intervalls lieber ein 5-er Intervall angezeigt haben würden, dann könnten Sie dies folgendermaßen tun:
+
+
+```{r}
+ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) +
+  scale_x_continuous(limits = c(0, 13)) + 
+  scale_y_continuous(limits = c(50, 90), breaks = c(50, 55, 60, 65, 70, 75, 80, 85, 90)) 
+```
+Das sieht etwas mühsam und unnötig kompliziert aus - und das ist es auch. Einfacher ist es, wenn Sie sich hier der seq()- Funktion von R bedienen, die automatisch eine Sequenz von Daten nach einem vorgebenen Muster generiert. Wenn Sie beispielswesie die oben dargestellte Zahlenreihe automatisch generieren wollen, dann übergeben Sie der Funktion seq() einfach den Anfangs- und Endpunkt der Zahlenreihe sowie das gewünschte Intervall. In diesem Fall also den Anfangswert 50, den Endwert 90 und das Intervall von 5:
+
+```{r}
+seq(from = 50, to = 90, by = 5)
+# Zum selben Ergebnis kommen Sie mit dieser deutlich kürzeren - aber auch etwas "leserunfreundlicheren" Variante:
+seq(50,90,5)
+```
+
+Legen wir also nun für unser Beispiel ein 5-er Intervall für die y-Achse und ein 2er-Intervall für die x-Achse fest:
+
+```{r}
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13), 
+                     breaks = seq(0, 13, 2)) + 
+  scale_y_continuous(limits = c(50, 90), 
+                     breaks = seq(50, 90, 5)) 
+
+```
+Nun zu einem kleinen Trick: Wenn Sie wissen möchten, welche Argumente Sie in einer Funktion noch so verwenden können, dann können Sie einfach innerhalb der Funktion - am besten direkt am Anfang oder nach einem Komma - die "Tab"-Taste drücken und erhalten dann ein Dropdown-Menü, in dem Ihnen die zur Verfügung stehenden Argumente angezeigt werden. Natürlich empfiehlt sich fürs Detail hier auch ein Blick in die Referenz bzw. die Dokumentation des Pakets, insbesondere wenn Sie sich nicht mehr ganz sicher sind, wie ein Argument genau bezeichnet ist, ist dieser Weg aber häufig der schnellste. Wenn Sie dann noch mit der Maus über eines der Argumente fahren, dann werden weitere Erläuterungen dazu eingeblendet. Wie Sie sehen können, gibt es noch eine Vielzahl weiterer Argumente in dieser Liste, mit deren Hilfe Sie Ihre Abbildung anpassen können. Wir können an dieser Stelle nicht auf alle eingehen, schauen uns aber noch das Argument "name" an - mit diesem können Sie die Bezeichnung der Achse steuern. Der angezeigte Hilfetext teilt Ihnen mit, dass per default einfach der Name der jeweiligen Variable angezeigt wird - das war ja bei den bisherigen Plots auch der Fall. Sie können aber natürlich auch andere Namen vergeben oder mit der Angabe von "NULL" die Ausgabe eines Labels unterdrücken. 
+
+
+```{r}
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13), 
+                     breaks = seq(0, 13, 2),
+                     name = "Gesundheitsausgaben") + 
+  scale_y_continuous(limits = c(50, 90), 
+                     breaks = seq(50, 90, 5),
+                     name = "Lebenserwartung") 
+
+```
+Übrigens - und dauch das ist typisch für R - ist das nicht die einzige Möglichkeit um die Beschriftung der Achsen zu verändern. Dafür können Sie auch die ggplot-Funktion "labs()" verwenden, die speziell für die Beschriftung von ggplot-Grafiken erstellt wurde. Hiermit können Sie nicht nur die Achsen beschriften sondern auch einen Titel ("title") bzw. Untertitel ("subtitle") oder eine Bildunterschrift ("caption") erstellen, oder alle möglichen Elemente eines ggplots bennenen - beispielsweise Legenden. 
+
+
+```{r}
+
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13), 
+                     breaks = seq(0, 13, 2)) + 
+  scale_y_continuous(limits = c(50, 90), 
+                     breaks = seq(50, 90, 5)) +
+  labs(x = "Gesundheitsausgaben", 
+       y = "Lebenserwartung", 
+       title = "Überschrift", 
+       subtitle = "Unterüberschrift", 
+       caption = "Quelle: QOG")
+
+```
+
+Doch kommen wir nochmal für ein etwas spezielleres Beispiel zurück auf die verschiedenen scale()-Funktionen. Bisher haben wir nur lineare Skalen verwendet, in einigen Fällen kann es durchaus sinnvoll sein eine lineare Skala in eine logarithmische Skala umzuwandeln. Auch das geht mit ggplot2 ziemlich fix und zwar mit einer Funktion namens scale_x_log10(). Diese skaliert die x-Achse eines Diagramms auf der Basis von log 10. Um sie zu verwenden, fügen wir sie einfach zum Diagramm hinzu. 
+
+An dieser Stelle ein kleiner Praxistipp: Zum herumexperimentieren bietet es sich an, einzelne Codeschnipsel nicht gleich zu löschen oder zu überschreiben, sondern "auzukommentieren". Indem Sie eine Raute vor bestimmte Code-Elemente setzen bringen Sie R dazu, diese Elemente als Kommentar zu behandeln und eben nicht auszuführen. So können Sie schnell und einfach verschiedene Darstellungsvarianten ausprobieren ohne jedesmal viel Schreibarbeit zu haben. Wenn Sie mehrere Zeilen gleichzeitig auskommentieren wollen müssen Sie übrigens nicht händisch vor jede Zeile eine Raute schreiben, vielmehr können Sie dafür die betreffenden Zeilen mit der Maus oder der Tastatur markieren und dann mit dem Tastenkürzel Umschalt+Steuerung+c die Zeilen Auskommentieren (und wieder zurückbringen).
+
+
+```{r}
+
+p + geom_point() +
+  # scale_x_continuous(limits = c(0, 13), 
+  #                    breaks = seq(0, 13, 2)) + 
+  scale_x_log10() +
+  scale_y_continuous(limits = c(50, 90),
+                     breaks = seq(50, 90, 5)) +
+  labs(x = "Gesundheitsausgaben", 
+       y = "Lebenserwartung", 
+       title = "Überschrift", 
+       subtitle = "Unterüberschrift", 
+       caption = "Quelle: QOG")
+
+
+```
+
+Wir werden uns später noch intensiver mit weiteren Skalentransformationen beschäftigen, für den Moment belassen wir es aber dabei. Im nächsten Schritt wollen wir uns nämlich erst einmal anschauen, wie wir noch weitere Variablen in die Darstellung einbeziehen können.
+
+Bisher haben wir uns den Zusammenhang zwischen den Gesundheitsausgaben einiger Länder und der Lebenswerwartung in den Ländern angeschaut. Jetzt könnte es interessant sein, etwas mehr über die einzelnen Punkte zu erfahren - beispielsweise welche Länder sich konkret dahinter verberger oder ob sich auf der Basis des Streudiagramms Erkenntnisse bezüglich bestimmter regionaler Häufungen ziehen lassen. Starten wir damit, Informationen über die Länder zu erhalten. 
+
+Eine Möglichkeit dafür bestünde darin, die Punkte in Abhängigkeit des Ländernamens oder eine Länder-ID unterschiedlich einzufärben. Im Quality of Government-Datensatz existieren dafür mehrere Variablen - zum Beispiel die Variable 
+
+
+```{r}
+qog %>%
+  select(ccodealp, ccode, cname) %>% 
+  head()
+
+```
+
+Nehmen wir also den ursprünglichen Code wieder zur Hand und versuchen die Punkte in Abhängigkeit des Länderkürzels "ccodealp" einzufärben. Dazu fügen wir der Funktion aes das Argument "colour" hinzu und übergeben hier die entsprechende Variable. Hier geschieht wieder ein "Mapping" - also eine Zuordnung der Werte einer Variable zu einer bestimmten Darstellungsform - in dem Fall zur Farbe:
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, colour = ccodealp))
+p + geom_point() 
+
+```
+
+Hups - was ist hier passiert? Nun, ggplot hat in der Tat die Punkte unterschiedlich eingefärbt und automatisch eine Legende hinzugefügt. Sonderlich hilfreich ist das in diesem Fall allerdings nicht, denn der Datensatz beinhaltet einfach zu viele Länder. So wird erstens die Legende viel zu groß, zweitens lassen sich die Punkte nicht gut voneiander unterscheiden, da die Farben zu ähnlich sind. Wären nur 5 oder zehn Länder in dem Datensatz würde das ganz prima funktionieren - im vorliegenden Fall leider nicht. Was Sie aber wieder sehen können, ist dass R per default bereits eine Farbskala gewählt hat und eine Legende hinzugefügt hat. Wie wir später noch sehen werden lassen sich natürlich auch Farbe und Legende noch anpassen - jetzt versuchen wir aber erstmal die Ländernamen auf eine andere Weise abzubilden. Dazu verwenden wir diesmal das Arguemnt "label" innerhalb der Funktion aes(). Wenn wir dann das Streudiagramm neu erstellen, passiert erstmal...
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, label = ccodealp))
+p + geom_point() 
+
+
+```
+...nichts, da das Arguemnt "label" alleine für die Punktdarstellung keine Konsequenzen hat. Fügen wir aber nun das geom "label" hinzu, werden die Punkte "gelabelt" - oder eben benannt:
+
+```{r}
+p + geom_point() + 
+  geom_label()
+```
+Hier wurden nun "Labels" erstellt die ein wenig an bedruckte Etiketten erinnern. Aufgrund der großen Anzahl an Ländern ist auch dies nun wenig hilfreich, wenngleich zumindest einzelne Länder nun einfacher zu erkennen sind. Eine mögliche Alternative bestünde nun darin, das geom "text" zu verwenden, wodurch nur der Text dargestellt wird - ohne eine Umrandung und Einfärbung: 
+
+```{r}
+p + 
+  #geom_point() + 
+  geom_text()
+```
+Auch noch nicht so viel besser. Letzter Versuch: Die Verwendung des Pakets ggrepel - einer Erweitwerung von ggplot, das Labels erstellt, die sich gegenseitig nicht überlappen sollen:
+
+```{r}
+library(ggrepel)
+
+# p + geom_point() + 
+  #geom_text_repel(max.overlaps = 100)
+  # geom_label_repel()
+```
+Okay, auch das funktioniert nicht. Es sind einfach zu viele Datenpunkte auf der Abbildung. Dennoch haben Sie nun mehrere nützliche Möglichkeiten gesehen, die sie verwenden könnten, wenn Sie etwas weniger Daten in ihrem Datensatz haben. Für den vorliegenden Fall ist es vermutlich sinnvoller, nicht nach einzelnen Ländern sondern nach anderen Merkmalen zu unterscheiden. Gibt es Variablen in unseren Daten, die sinnvollerweise auf die Farbästhetik abgebildet werden können? Wir könnten beispielsweise versuchen, die Datenpunkte nach dem Kontinent einzufärben, auf dem sich die jeweiligen Länder befinden:
+
+```{r}
+# p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, colour = continent))
+# p + geom_point() 
+```
+
+Hier wurden nun die einzelnen Datenpunkte nach Kontinenten eingefärbt, und eine Legende mit einem Schlüssel zu den Farben wurde automatisch hinzugefügt. Das sieht schon sehr viel besser und handlicher aus. Und: Jetzt können Sie sich wieder auf die Suche nach einem Muster machen - beispielsweise clustern die afrikanischen Länder (rot) erkennbar links unten und die europäischen Länder rechts oben. 
+
+Eine weitere Möglichkeit bestünde darin, die Größe der Länder noch 
+
+
+```{r}
+# p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, color = continent))
+# p + geom_point() +
+#   scale_size(name   = "Einwohnerzahl",
+#              breaks = c(1000000, 10000000, 100000000, 1000000000),
+#              labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio."))
+```
+
+## Mapping vs. Setting
+
+Kommen wir nun zu einer wichtigen Unterscheidung - und zwar der Unterscheidung zwischen einem ästhetischen "Mapping" und einer fixen Einstellung. Wie wir gesehen haben, können wir beispielsweise mit einem Mapping innherhalb der aes()-Funktion eine Variable durch ein bestimmtest visuelles Element wie Größe, Farbe oder Form darstellen. Schauen wir uns diesen Code nochmals an:
+
+```{r}
+# p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, color = continent))
+# p + geom_point() 
+```
+Dieser Code gibt keine direkte Anweisung wie "stelle die Punkte sehr gro dar" oder "färbe alle Punkte in rot". Stattdessen heißt es: "Die Eigenschaft 'Farbe' soll durch die Variable "Kontinent" repräsentiert werden und die Größe der Punkte soll in Abhängigkeit der Eiwohnerzahl variieren. Wenn wir alle Punkte in der Abbildung in blau einfärben wollten und alle Punkte gleichermaßen vergrößern wöllten, dass müssten wir diese Festlegung außerhalb der Mappinng-Funktion also außerhalb von aes() tun. Schauen wir uns das mal an. Wir versuchen innerhalb der aes()-Funktion die Größe der Punkte auf den Wert 4 zu setzen und alle Punkte in blau einzufärben:
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = 4, color = "blue"))
+p + geom_point() 
+```
+Tatsächlich passiert hier auch etwas - allerdings nicht unbedingt das, was wir wollten. Es werden plötzlich zwei neue Legenden erstellt und die Punkte sind alle rot und nicht blau. Warum?
+
+Nun, ggplot hat versucht gebau das zu tun, was es soll. Innerhalb der aes()-Funktion erwartet ggplot eine Zuordnung von Variablen zu bestimmten visuellen Eigenschaften. Wenn sie hier nun das Argument colour verwenden, geht ggplot davon aus, dass Sie hier auch eine Variable übergeben. Wir haben aber stattdessen nur ein Wort angegeben, nämlich "blau". Dennoch wird aes() sein Bestes tun, um dieses Wort so zu behandeln, als wäre es eine Variable. Aufgrund bestimmter Recycling-Regeln von R wird nun in der Tat eine Variable für Ihre Daten erstellt, die für alle Fälle in Ihrem Datensatz die Zeichenkette "blue" beinhaltet. Dann stellt ggplot die Ergebnisse im Diagramm dar, wie Sie es gewünscht haben indem es sie auf die Farbästhetik abbildet. 
+
+Denken Sie also immer daran, dass die aes()-Funktion nur für Mappings gedacht ist. Verwenden Sie sie nicht, um Eigenschaften auf einen bestimmten Wert zu ändern. Wenn wir eine Eigenschaft setzen wollen, tun wir das in dem von uns verwendeten geom_ und außerhalb der Zuordnung in der aes(...)-Funktion. Versuchen Sie also folgendes:
+
+<!-- ```{r} -->
+<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) -->
+<!-- p + geom_point(size = 4, color = "blue")  -->
+<!-- ``` -->
+
+<!-- Sie sehen: Die Funktion geom_point() kann ein Farbargument direkt annehmen, und R weiß auch, welche Farbe "blue" ist. Nun können Sie also herumexperimentieren und die Grundeigenschaften Ihrer "Punkte" verändern: -->
+
+<!-- ```{r} -->
+<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) -->
+<!-- p + geom_point(size = 4, color = "blue", alpha = 0.5)  -->
+<!-- ``` -->
+
+<!-- Verwenden Sie zum Beispiel das Argument alpha um die Transparenz Ihrer Objekte zu steuern. Dabei können sie Werte zwischen 0 und 1 setzen. Ein Objekt mit einem Alpha-Wert von Null ist vollständig transparent. Ein Objekt mit einem Alpha von eins ist vollständig undurchsichtig. Die Verwendung von Transparenten Objekten iust dabei übrigens nicht nur eine graphische Spielerei, vielmehr können transparente Objekte sehr nützlich sein, wenn viele sich Punkte oder Objekte überlappen - wenn es also zum sog. Overplotting kommt. Sie können durch eine sehr hohe TRansparenz so zum Beispiel Ballungen in den den Daten leichter erkennen - wie z.B. so: -->
+
+<!-- ```{r} -->
+<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) -->
+<!-- p + geom_point(color = "black", alpha = 0.1)  -->
+<!-- ``` -->
+
+
+
+
+<!-- ```{r} -->
+<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, fill = continent)) -->
+<!-- p + geom_point(shape = 21, alpha = 0.7) + -->
+<!--   scale_x_continuous(limits = c(0, 12),  -->
+<!--                      breaks = seq(0, 13, 2)) +  -->
+<!--   scale_y_continuous(limits = c(50, 85),  -->
+<!--                      breaks = seq(50, 90, 5)) + -->
+<!--   scale_size(name   = "Einwohnerzahl", -->
+<!--              breaks = c(1000000, 10000000, 100000000, 1000000000), -->
+<!--              labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio.")) +  -->
+<!--   labs(x = "Gesundheitsausgaben in Prozent",  -->
+<!--        y = "Lebenserwartung",  -->
+<!--        size = "Einwohnerzahl", -->
+<!--        fill = "Kontinent",  -->
+<!--        title = "Überschrift",  -->
+<!--        subtitle = "Unterüberschrift",  -->
+<!--        caption = "Quelle: QOG") + -->
+<!--   theme_minimal() -->
+
+
+
+
+<!-- ``` -->
+
+<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, colour = continent,   fill = continent)) -->
+<!-- p + geom_point(alpha = 0.7) + -->
+<!--   scale_x_continuous(limits = c(0, 12),  -->
+<!--                      breaks = seq(0, 13, 2)) +  -->
+<!--   scale_y_continuous(limits = c(50, 85),  -->
+<!--                      breaks = seq(50, 90, 5)) + -->
+<!--   scale_size(name   = "Einwohnerzahl", -->
+<!--              breaks = c(1000000, 10000000, 100000000, 1000000000), -->
+<!--              labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio.")) +  -->
+<!--   labs(x = "Gesundheitsausgaben",  -->
+<!--        y = "Lebenserwartung",  -->
+<!--        size = "Einwohnerzahl", -->
+<!--        fill = "Kontinent",  -->
+<!--        title = "Überschrift",  -->
+<!--        subtitle = "Unterüberschrift",  -->
+<!--        caption = "Quelle: QOG") -->
+
+
+
+<!-- ^```{r} -->
+<!-- p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y=lifeExp)) -->
+<!-- p + geom_point(alpha = 0.3) + -->
+<!-- geom_smooth(method = "gam") + -->
+<!-- scale_x_log10(labels = scales::dollar) + -->
+<!-- labs(x = "GDP Per Capita", y = "Life Expectancy in Years", -->
+<!-- title = "Economic Growth and Life Expectancy", -->
+<!-- subtitle = "Data points are country-years", -->
+<!-- caption = "Source: Gapminder.") -->
+<!-- ``` -->
+
+<!-- Jetzt können wir ein einigermaßen ausgefeiltes Diagramm erstellen. Wir setzen die Alpha der Punkte auf einen niedrigen Wert, machen schönere x- und y-Achsenbeschriftungen, und fügen einen Titel, einen Untertitel und eine Beschriftung hinzu. Wie Sie im Code sehen können zu sehen ist, werden zusätzlich zu x , y und anderen ästhetischen Zuordnungen in (z. B. Größe, Füllung oder Farbe) kann die Funktion labs() auch den Text für Titel, Untertitel und Beschriftung festlegen. Sie steuert die Hauptbeschriftungen der Skalen. Das Aussehen von Dingen wie Achsentick- ist Aufgabe verschiedener scale_-Funktionen, wie z. B. der Funktion scale_x_log10() Funktion, die hier verwendet wird. Wir werden mehr darüber erfahren was mit scale_ Funktionen gemacht werden kann. Gibt es Variablen in unseren Daten, die sinnvollerweise auf die Farbästhetik abgebildet werden können? auf die Farbästhetik abgebildet werden können? Nehmen wir den Kontinent. In Abbildung 3.14 sind die wurden die einzelnen Datenpunkte nach Kontinenten eingefärbt, und eine Legende mit einem Schlüssel zu den Farben wurde automatisch in die der Darstellung hinzugefügt. Außerdem haben wir jetzt statt einer Glättungslinie fünf. Es gibt eine für jeden einzelnen Wert der Kontinentvariable. Dies ist eine Folge der Art und Weise, wie ästhetische Zuordnungen inhärent sind. tung. Zusammen mit x und y wird die ästhetische Farbzuordnung in Aufruf von ggplot() festgelegt, mit dem wir das p-Objekt erstellt haben. Wenn nicht anders angegeben -->
+<!-- werden alle Geoms, die auf das ursprüngliche Plot-Objekt gelegt werden die Mappings dieses Objekts übernehmen. In diesem Fall erhalten wir sowohl unsere Punkte und Glättungen nach Kontinenten gefärbt. -->
+
+<!-- ```{r} -->
+<!-- p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp, -->
+<!-- color = continent)) -->
+<!-- p + geom_point() + geom_smooth(method = "loess") + scale_x_log10() -->
+<!-- ``` -->
+<!-- Wenn es das ist, was wir wollen, dann könnten wir auch in Betracht ziehen, das Standardfehlerband jeder Zeile schattieren, damit es der dominierenden Farbe entspricht, wie in Abbildung 3.15. Die Farbe des Standardfehlerbandes wird durch die durch die Füllungsästhetik gesteuert. Während die Farbästhetik das Während die Farbästhetik das Aussehen von Linien und Punkten beeinflusst, ist die Füllung für die gefüllten Bereiche von Balken, Polygone und, in diesem Fall, das Innere des Standardfehlerbandes des Glätters. Fehlerbandes. -->
+
+<!-- ```{r} -->
+<!-- p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp, -->
+<!-- color = continent, fill = continent)) -->
+<!-- p + geom_point() + geom_smooth(method = "loess") + scale_x_log10() -->
+<!-- ``` -->
+<!-- Wenn Sie sicherstellen, dass Farbe und Füllungsästhetik konsistent übereinstimmen auf diese Weise wird das Gesamtbild des Plots verbessert. Um dies zu erreichen müssen wir nur festlegen, dass die Zuordnungen jeweils auf dieselbe Variable sind. -->
+
+
+
+<!-- Vielleicht sind fünf verschiedene Glätter zu viel, und wir wollen nur eine Linie. Trotzdem möchten wir die Punkte farblich nach Kontinenten kodiert nach Kontinent. Standardmäßig erben Geoms ihre Mappings von der ggplot() Funktion. Wir können dies ändern, indem wir verschiedene Ästhetik für jedes Geom angeben. Wir verwenden denselben Ausdruck mapping = aes(...) Ausdruck wie beim ersten Aufruf von ggplot(), verwenden ihn aber jetzt auch in den geom_-Funktionen und geben die Mappings an, die wir auf die einzelnen Funktionen anwenden wollen die wir auf jede Funktion anwenden wollen (Abb. 3.16). Die in der ursprünglichen ggplot()-Funktion angegebenen Mappings Funktion angegebenen Zuordnungen - hier x und y - werden für alle nachfolgenden geoms. -->
+
+<!-- ```{r} -->
+<!-- p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) -->
+<!-- p + geom_point(mapping = aes(color = continent)) + -->
+<!-- geom_smooth(method = "loess") + -->
+<!-- scale_x_log10() -->
+<!-- ``` -->
+
+<!-- Es ist möglich, kontinuierliche Variablen der Farbästhetik zuzuordnen, abzubilden. Zum Beispiel können wir den Logarithmus der Bevölkerung eines jeden Länderjahres ( pop ) auf die Farbe abbilden. (Wir können den Logarithmus der Bevölkerung direkt in der aes()-Anweisung der aes()-Anweisung unter Verwendung der log()-Funktion. R wertet dies für uns aus.) Wenn wir dies tun, erzeugt ggplot eine Gradientenskala. Sie ist kontinuierlich, wird aber in der Legende in Intervallen markiert. Je nach Umständen können Größen wie die Bevölkerung auf einen kontinuierlichen Farbverlauf abgebildet werden. kontinuierlichen Farbverlauf (Abb. 3.17) mehr oder weniger effektiv sein als als die Einteilung der Variable in kategorische Bereiche, z. B. von niedrig bis hoch. Im Allgemeinen lohnt es sich immer, die Daten zunächst in ihrer kontinuierlichen Form zu betrachten. Es lohnt sich immer, die Daten zunächst in ihrer kontinuierlichen Form zu betrachten, anstatt sie in Kategorien zu zerschneiden oder einzuteilen. -->
+
+
+<!-- ```{r} -->
+<!-- p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) -->
+<!-- p + geom_point(mapping = aes(color = log(pop))) + scale_x_log10() -->
+<!-- ``` -->
+
+<!-- Es lohnt sich, der Art und Weise, wie ggplot seine Skalen zeichnet, etwas mehr Aufmerksamkeit zu schenken. ggplot seine Skalen zeichnet. Da jede abgebildete Variable eine Skala hat, können wir viel darüber lernen, wie ein Diagramm konstruiert wurde, wie ein Diagramm konstruiert wurde und welche Mappings es enthält, indem wir sehen, wie die Legenden aussehen aussehen. Schauen Sie sich zum Beispiel die Legenden in Abbildungen 3.15 und 3.16. In der Legende der ersten Abbildung, die in Abbildung 3.18 auf der linken Seite links, sehen wir mehrere visuelle Elemente. Der Schlüssel für jeden Kontinent zeigt einen Punkt, eine Linie und einen schattierten Hintergrund. Die Legende für die zweiten Abbildung, die rechts dargestellt ist, enthält nur einen Punkt für jeden Kontinent. ohne schattierten Hintergrund oder Linie. Wenn Sie sich noch einmal den Code der Abbildungen 3.15 und 3.16 noch einmal ansehen, werden Sie sehen, dass wir im ersten Fall die Variable continent sowohl der Farbe als auch der Füllung zugewiesen haben. Dann haben wir die Abbildung mit geom_point() gezeichnet und für jeden Kontinent eine Linie mit tinent mit geom_smooth() eine Linie angepasst. Punkte haben eine Farbe, aber der Glätter Farbe (für die Linie selbst) und Füllung (für das schattierte -->
+<!-- Standardfehler-Band). Jedes dieser Elemente wird in der Legende dargestellt in der Legende dargestellt: die Punktfarbe, die Linienfarbe und die Füllung des Bandes. In der zweiten Abbildung haben wir beschlossen, die Dinge zu vereinfachen, indem wir nur -->
+<!-- die Punkte durch den Kontinent gefärbt werden. Dann haben wir nur einen einzigen Glätteisen für das gesamte Diagramm. In der Legende zu dieser Abbildung sind daher sowohl die farbige Linie als auch das schattierte Kästchen fehlen. Wir sehen nur eine Legende für die Zuordnung von Farbe zu Kontinent in geom_point() . Im Diagramm selbst ist die Linie, die von geom_smooth() -->
+<!-- gezeichnete Linie ist standardmäßig auf ein helles Blau eingestellt, das sich von allem auf der Skala, und das schattierte Fehlerband ist standardmäßig auf grau eingestellt. Kleine Details wie diese sind keine Zufälle. Sie sind eine direkte Konsequenz der grammatikalischen Denkweise von ggplot über die Beziehung zwischen den zwischen den Daten hinter dem Diagramm und den visuellen Elementen, die repräsentieren. -->
+
+
+<!-- ## Speichern Sie Ihre Arbeit -->
+
+<!-- Nachdem Sie nun begonnen haben, Ihre eigenen Plots zu erstellen, fragen Sie sich vielleicht, wie Sie sie speichern können und wie Sie ihre Größe und Format kontrollieren können. Wenn Sie in einem RMarkdown-Dokument arbeiten, dann werden die von Ihnen erstellten Diagramme darin eingebettet, wie wir bereits gesehen haben. Sie können die Standardgröße von Plots in Ihrem .Rmd-Dokument festlegen Rmd-Dokuments festlegen, indem Sie eine Option in Ihrem ersten Code-Baustein setzen. Diese Option weist R an, 8 x 5 Abbildungen zu erstellen:  -->
+
+<!-- ```{r} -->
+<!-- knitr::opts_chunk$set(fig.width = 8, fig.height = 5) -->
+<!-- ``` -->
+
+<!-- Da Sie Diagramme in verschiedenen Größen und Formen erstellen werden, werden Sie manchmal die Größe bestimmter Diagramme steuern wollen, ohne die Standardeinstellungen zu ändern. Zu diesem Zweck können Sie die gleichen Optionen zu jedem einzelnen Teilstück innerhalb der geschweiften Klammern am beginnen. Denken Sie daran, dass jeder Abschnitt mit drei Backticks beginnt und dann einem Paar geschweifter Klammern, die den Namen der Sprache (in unserem Fall immer r ) und eine optionale Bezeichnung: -->
+
+<!-- ```{r example} -->
+<!-- p + geom_point() -->
+<!-- ``` -->
+
+<!-- Sie können der Bezeichnung ein Komma folgen lassen und eine Reihe von Optionen angeben, falls erforderlich. Sie gelten dann nur für diesen Abschnitt. Um eine Figur zwölf Zoll breit und neun Zoll hoch zu machen, sagen wir sagen wir z. B.  -->
+
+<!-- ```{r, fig.width = 12, fig.height = 9} -->
+<!-- p + geom_point() -->
+<!-- ``` -->
+<!-- {r example, fig.width = 12, fig.height = 9} in der Abschnitt der geschweiften Klammern. Oft müssen Sie Ihre Figuren einzeln speichern, da sie in Folien eingefügt oder in Papieren veröffentlicht werden, die nicht mit RMarkdown erstellt wurden. Das Speichern einer Abbildung in einer Datei kann kann auf verschiedene Arten erfolgen. Bei der Arbeit mit ggplot ist der einfachste Weg, die Funktion ggsave() zu verwenden. Zum Speichern der zuletzt zuletzt angezeigte Abbildung zu speichern, geben wir den Namen an, unter dem wir sie speichern wollen unter: -->
+
+<!-- ```{r} -->
+<!-- ggsave(filename = "meine_abbildung.png") -->
+<!-- ``` -->
+
+<!-- Dadurch wird die Abbildung als PNG-Datei gespeichert, ein Format, das für die für die Anzeige auf Webseiten geeignet ist. Wenn Sie stattdessen ein PDF-Format wünschen, ändern Sie die Erweiterung der Datei: -->
+
+<!-- ```{r} -->
+<!-- ggsave(filename = "meine_abbildung.pdf") -->
+<!-- ``` -->
+
+<!-- Denken Sie daran, dass Sie der Einfachheit halber nicht schreiben müssen Dateiname = zu schreiben, solange der Name der Datei das erste Argument ist, das Sie ggsave() übergeben. Sie können auch Plot-Objekte an ggsave() übergeben. Für Beispiel: Wir können unsere aktuelle Darstellung in ein Objekt namens p_out speichern und dann ggsave() mitteilen, dass wir dieses Objekt speichern wollen. -->
+
+<!-- ```{r} -->
+<!-- p_out <- p + geom_point() + geom_smooth(method = "loess") + scale_x_log10() -->
+<!-- ggsave("meine_Abbildung.pdf", plot = p_out) -->
+<!-- ``` -->
+
+<!-- Wenn Sie Ihre Arbeit speichern, ist es nützlich, einen oder mehrere Unterordner zu haben, in denen Sie nur Abbildungen speichern. Sie sollten auch darauf achten Sie sollten auch darauf achten, Ihre gespeicherten Abbildungen sinnvoll zu benennen. fig_1.pdf oder meine_Abbildung.pdf sind keine guten Namen. Die Namen der Abbildungen sollten kompakt, aber aussagekräftig sein und zwischen den Abbildungen innerhalb eines Projekt übereinstimmen. Darüber hinaus ist es, auch wenn es in der heutigen Zeit eigentlich nicht mehr der Fall sein sollte Heutzutage ist es außerdem ratsam, auf Nummer sicher zu gehen und Dateinamen zu vermeiden, die Dateinamen zu vermeiden, die Zeichen enthalten, die Ihren Code in Zukunft zum Verhängnis werden lassen. Diese gehören Apostrophe, Backticks, Leerzeichen, Schrägstriche und Anführungszeichen, und Anführungszeichen. Im Anhang finden Sie eine kurze Erläuterung, wie Sie Ihre -->
+<!-- Dateien in Ihrem Projektordner organisieren. Betrachten Sie den Projektordner als die den Projektordner als Basis Ihrer Arbeit für die Arbeit, die Sie gerade verfassen, und legen Sie Ihre Daten und Abbildungen in Unterordnern innerhalb des Projektordners ab. Unter erstellen Sie zunächst mit Ihrem Dateimanager einen Ordner mit dem Namen "figures" innerhalb Ihres Projektordners. Zum Speichern von Zahlen können Sie Kirill Müllers praktische Bibliothek verwenden, die Ihnen die Arbeit mit Dateien und und Unterordnern zu arbeiten, ohne die vollständigen Dateipfade eintippen zu müssen. Laden Sie die Bibliothek in den Setup-Knoten Ihres RMarkdown-Dokuments. Wenn Sie wird Ihnen angezeigt, wo sich "here" für das aktuelle Projekt befindet. Sie werden sehen eine Meldung, die in etwa so lautet, mit Ihrem Dateipfad und Benutzernamen anstelle von meinem: -->
+
+<!-- ```{r} -->
+<!-- # here() beginnt unter /Users/kjhealy/projects/socviz -->
+<!-- ``` -->
+
+<!-- Sie können dann die Funktion here() verwenden, um das Laden und Speichern Ihrer Arbeit einfacher und sicherer zu machen. Angenommen, ein Ordner mit dem Namen "figures" in Ihrem Projektordner existiert, können Sie dies tun:  -->
+
+<!-- ```{r} -->
+<!-- #ggsave(here("figures", "lifexp_vs_gdp_gradient.pdf"), plot = p_out) -->
+<!-- ``` -->
+
+<!-- Dies speichert p_out als eine Datei namens lifeexp_vs_gdp_gradient.pdf im dem Verzeichnis figures, d. h. in Ihrem aktuellen Projektordner. Sie können Ihre Abbildung in einer Vielzahl von Formaten speichern, je nach Ihren Bedürfnissen (und auch, in geringerem Maße, von Ihrem speziellen Computer Computersystem). Die wichtigste Unterscheidung, die Sie im Auge behalten sollten ist die Unterscheidung zwischen Vektorformaten und Rasterformaten. Eine Datei mit einem Vektor Vektorformat, wie PDF oder SVG, wird als eine Reihe von Anweisungen über Linien, Formen, Farben und deren Beziehungen gespeichert. Die Betrachtungssoftware (wie Adobe Acrobat oder Apples Preview-Anwendung für PDFs) interpretiert dann diese Anweisungen und zeigt die Abbildung an. Die Darstellung - Diese Art der Darstellung ermöglicht es, die Größe der Abbildung leicht zu verzerrt wird. Die zugrunde liegende Sprache des PDF-Formats ist Postscript, das auch die Sprache des modernen Schriftsatzes und und des Drucks ist. Das macht ein vektorbasiertes Format wie PDF zur besten beste Wahl für die Einreichung bei Zeitschriften. Ein rasterbasiertes Format hingegen speichert Bilder im Wesentlichen als Rasterformate hingegen speichern Bilder im Wesentlichen als ein Raster von Pixeln einer vordefinierten Größe mit Informationen über Informationen über die Position, Farbe, Helligkeit usw. jedes Pixels im -->
+<!-- Raster. Dies ermöglicht eine effizientere Speicherung, vor allem wenn es in Verbindung mit Komprimierungsmethoden, die die Redundanz in Bildern ausnutzen Redundanz in Bildern nutzen, um Platz zu sparen. Formate wie JPG sind komprimierte Rasterformate. Eine PNG-Datei ist ein Rasterbildformat, das verlustfreie Komprimierung unterstützt. Bei Diagrammen, die eine große Menge Daten enthalten, sind PNG-Dateien in der Regel viel kleiner als das entsprechende entsprechende PDF-Datei. Allerdings können Rasterformate nicht einfach in der Größe verändert werden. Insbesondere können sie nicht vergrößert werden, ohne dass sie -->
+<!-- pixelig oder körnig zu werden. Formate wie JPG und PNG sind die Standard die Standardformate für die Darstellung von Bildern im Internet. Das neuere SVG Format ist ein vektorbasiertes Format, das dennoch von vielen -->
+<!-- vielen Webbrowsern unterstützt. Im Allgemeinen sollten Sie Ihre Arbeit in mehreren verschiedenen Formaten speichern. maten speichern. Wenn Sie in verschiedenen Formaten und Größen speichern, müssen Sie Größe müssen Sie eventuell mit der Skalierung der Grafik und der Größe der der Schriftarten experimentieren, um ein gutes Ergebnis zu erzielen. Das Argument scale für -->
+<!-- ggsave() kann Ihnen hier helfen (Sie können verschiedene Werte ausprobieren, wie scale=1.3 , scale=5 , und so weiter). Sie können auch ggsave() verwenden, um die Höhe und Breite Ihres Diagramms explizit in den von Ihnen gewählten Einheiten die Sie wählen. -->
+
+<!-- ```{r} -->
+<!-- # ggsave(here("figures", "lifexp_vs_gdp_gradient2.pdf"), plot = p_out, -->
+<!-- #        height = 8, width = 10, units = "in") -->
+<!-- ``` -->
+
+
+
+
+
+<!-- ## Scales -->
+
+
+<!-- Wenn unser Ziel an dieser Stelle nur darin bestünde, ein Diagramm der Lebenserwartung im Vergleich zum Lebenserwartung im Vergleich zum BIP unter Verwendung sinnvoller Skalen und einer Glättung zu zeigen, würden wir darüber nachdenken, das Diagramm mit schöneren Achsenbeschriftungen und einem Titel. Vielleicht sollten wir auch die wissenschaftliche Notation auf der x-Achse durch den tatsächlichen Dollarwert ersetzen. Beides lässt sich recht einfach bewerkstelligen. Kümmern wir uns zunächst um die Skala kümmern. Die Beschriftung der Tick-Marken kann über die die scale_ Funktionen. Es ist zwar möglich, eine eigene Funktion für die Achsenbeschriftung zu entwickeln (oder die Beschriftungen manuell einzugeben, wie wir später sehen werden). später sehen werden), gibt es auch ein praktisches Skalenpaket, das einige nützliche fertige Formatierungsfunktionen enthält. Wir können entweder das gesamte Paket mit library(scales) laden oder, was noch bequemer ist, einfach den gewünschten Formatierer aus dieser Bibliothek. Hier ist es die dollar()-Funktion. Um eine Funktion direkt aus einem Paket zu holen, das wir nicht geladen haben, verwenden wir die Syntax thepackage::thefunction . Also können wir dies tun: -->
+
+
+<!-- ```{r} -->
+<!-- p + geom_point() + -->
+<!--   scale_x_continuous(limits = c(0, 13),  -->
+<!--                      breaks = seq(0, 13, 2), -->
+<!--                      labels = scales::dollar) +  -->
+<!--   scale_y_continuous(limits = c(50, 90),  -->
+<!--                      breaks = seq(50, 90, 5)) + -->
+<!--   labs(x = "Gesundheitsausgaben",  -->
+<!--        y = "Lebenserwartung",  -->
+<!--        title = "Überschrift",  -->
+<!--        subtitle = "Unterüberschrift",  -->
+<!--        caption = "Quelle: QOG") -->
+
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+<!-- p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) -->
+<!-- p + geom_point() + -->
+<!-- geom_smooth(method = "gam") + -->
+<!-- scale_x_log10(labels = scales::dollar) -->
+<!-- ``` -->
+
+
+
+
+<!-- ## Including Plots -->
+
+<!-- You can also embed plots, for example: -->
+
+<!-- ```{r pressure, echo=FALSE} -->
+<!-- plot(pressure) -->
+<!-- ``` -->
+
+<!-- Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot. -->
