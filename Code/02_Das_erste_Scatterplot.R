@@ -73,6 +73,6 @@ p + geom_density_2d() +
 # 2. Sagen Sie ggplot(), welche Variablen Sie dargestellt haben wollen.
 #     Der Einfachheit halber speichern Sie die Ergebnisse der ersten beiden Schritte in ein Objekt namens "p".
 # 3. Teilen Sie ggplot mit, welchen Darstellungstyp Sie gerne sehen wollen.
-#     Verwenden Sie dazu die vorgesehenen     geom_()-Funktionen, indem Sie diese einzeln und nacheinander zum Objekt "p" hinzufügen.
+#     Verwenden Sie dazu die vorgesehenen geom_()-Funktionen, indem Sie diese einzeln und nacheinander zum Objekt "p" hinzufügen.
 # 4. Verwenden Sie Zusatzfunktionen, um Skalen, Beschriftungen, Markierungen, Titel
 #     und vieles mehr hinzufügen.
