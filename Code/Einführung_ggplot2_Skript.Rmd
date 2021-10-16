@@ -2,8 +2,8 @@
 title: "Datenvisualisierung mit ggplot2"
 author: "Sebastian Kuhn"
 date: "4 9 2021"
-output: html_document
-#output: word_document
+#output: html_document
+output: word_document
 #output: pdf_document
 description: "Skript für die Videocast-Reihe zum Thema Datenvisualisierung mit ggplot2"
 tags: ["DataViz", "tutorial", "R", "tidyverse", "ggplot2"]
@@ -28,6 +28,10 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE, out.width = "100%",
 * [Datenvisualisierung mit ggplot2 - Teil 2: Das erste Scatterplot](#scatter)
   + [Und los geht's!](#los)
   + [ggplot-Befehle sinnvoll aufbauen](#Aufbau)
+* [Datenvisualisierung mit ggplot2 - Teil 3: Unser Scatterplot erweitern und anpassen](#anpassen)
+  + [Die scale()-Funktion](#scale)
+  + [Drei und mehr Variablen verwenden](#drei)
+  + [Darstellung verbessern](#verbessern)
 
 ## Datenvisualisierung mit ggplot2 - Teil 1: Grundlagen {#basics}
 
@@ -224,7 +228,7 @@ Zwei Punkte sind mir an dieser Stelle wichtig: Erstens die Erkenntnis, dass auch
 p + geom_line()
 ```
 
-Das macht offenkundig keinen Sinn. Vielleicht wollen Sie aber mal ein Density-Plot - also ein Dichte-Diagramm - erstellen, das die Verteilung nummerischer Variable in einer bestimmten Weise abbildet - das würden Sie zum Beispiel mit diesem Code hier machen: 
+Das macht offenkundig keinen Sinn. Vielleicht wollen Sie aber mal ein Density-Plot - also ein Dichte-Diagramm - erstellen, das die Verteilung nummerischer Variable in einer bestimmten Weise abbildet - das würden Sie zum Beispiel mit diesem Code ## Darstellung verbessern {#verbessern}hier machen: 
 
 ```{r}
 p + geom_density_2d() + 
@@ -250,253 +254,396 @@ Die zentralen Schritte sind - Erstens - das Sie der `ggplot()`-Funktion mitteile
 
 All' das werden wir uns in den kommenden Videos anschauen - für heute würde ich es gerne dabei bewenden lassen. Bis dahin: viel Spaß beim Ausprobieren und bis zum nächsten Video!
 
+## Datenvisualisierung mit ggplot2 - Teil 3: Unser Scatterplot erweitern und anpassen {#anpassen}
 
-<!-- ## Datenvisualisierung mit ggplot2 - Teil 3: Das erste Scatterplot {#scatter} -->
+Herzlich willkommen zum dritten Teil der Video-Tutorial-Reihe zur Datenvisualisierung mit `ggplot2`. Im letzten Video hatte ich Ihnen gezeigt, wie Sie mit `ggplot` ein recht simples Streudiagramm erstellen können. In diesem Video möchte ich nun mit Ihnen etwas tiefer in die Welt von `ggplot` eintauchen und Ihnen zeigen, wie Sie Ihre Darstellungen in wenigen Schritten anpassen und verändern können um so weitere Erkenntnisse aus Ihren Daten zu ziehen und ganz nebenbei auch vorzeigbare - oder anders gesagt: schöne und nützliche - Datenvisualisierungen zu erstellen.
 
-<!-- Herzlich willkommen zum dritten Teil der Video-Tutorial-Reihe zu `ggplot`. Im letzten Video hatten wir mit dem folgenden Code ein erstes Streudiagramm erstellt: -->
+Ich werden hier wieder den selben Datensatz verwenden, den ich bereits im letzten Video verwendet habe. Den Datensatz habe ich bereits geladen, die notwendigen Pakete aus dem `tidyverse` laden wir wieder mit diesem Befehl: 
 
-<!-- ```{r} -->
-<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) -->
-<!-- p + geom_point() -->
-<!-- ``` -->
+```{r}
+## Wichtige Pakete laden und Datensatz importieren
+library(tidyverse) # lädt alle Pakete des "tidyverse" - unter anderem ggplot2 und readr
 
-<!-- Nun wollen wir uns anschauen, wie wir diese Darstellung mit wenigen Schritten anpassen und verändern können. Ein Blick auf das Streudiagramm legt ja durchaus einen Zusammenhang zwischen den beiden verwendeten Variablen nahe. Häufig ist es allerdings nicht ganz so einfach, Muster aus Streudiagrammen abzulesen - vor allem, wenn die Diagramme viele Punkte enthalten, die sich gegenseitig überlagern. Hier sind häufig Trendlinien, Regressionsgeraden oder Glättungslinien hilfreich. Insbesondere bei der Visualisierung und Interpretation von bivariaten Regressionen sind derlei Visualisierungen sehr nützlich. -->
+# Verwenden Sie bitte den Auszug aus dem QOG-Datensatz - beispielsweise mit 
+# qog <- read.csv("./Data/qog_sample.csv") # Laufwerk und Verzeichnis anpassen
+# oder
+# qog <- load("./Data/qog_sample.rdata") # Laufwerk und Verzeichnis anpassen
+```
 
-<!-- In ggplot ist dafür die geometrische Funktion `geom_smooth()` vorgesehen, die dem Plot eine Regressionslinie hinzufügt, die das zugrundeliegende Muster in den Daten am besten beschreibt: -->
+Zur Erinnerung: Im letzten Video hatten wir ja mit dem folgenden Code ein erstes Streudiagramm erstellt um uns einen möglichen Zusammenhang zwischen der Höhe staatlicher Gesundheitsausgaben und der Lebenserwartung anzuschauen - und zwar für alle Länder, für die wir Daten dazu vorliegen haben. 
 
-<!-- ```{r} -->
-<!-- p + geom_smooth() -->
-<!-- ``` -->
+```{r}
+# Streugiagramm aus dem letzten Tutorial nochmal erstellen
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp))
+p + geom_point()
+```
 
-<!-- Wie Sie der Ausgabe entnehmen können, wurden nun keine Punkte mehr gezeichnet sondern eine sogenannte geglättete Linie. Allerdings hat `ggplot` nicht nur eine Linie, sondern auch gleich einen Vertrauensbereich - also das graue Band um die Linie herum - erstellt, der den Standardfehler für die Linie anzeigt. Ein Blick auf die Meldung in der Konsole gibt darüber hinaus Auskunft darüber, dass für die Berechnung der Linie eine bestimmte Methode verwendet wurde - in diesem Fall wurde als Glättungsverfahren der LOESS-Algorithmus verwendet, der auf einer lokal gewichteten Regressionsfunktion beruht. Da sie `ggplot` in der funktion `geom_smooth()` weder mitgeteilt haben, welche Methode verwendet werden soll, noch dass ein Vertauensbereich dargestellt werden soll, muss es sich bei diesen beiden Punkten offenkundig wieder um vordefinierte Standardeinstellungen handeln. Ich hatte ja bereits in den letzten Videos darauf hingewiesen, dass sich die Entwickler von `ggplot` viele Gedanken über sinnvolle default-Einstellungen gemacht haben, die in vielen Fällen den Bedürfnissen der Nutzern entsprechen. Natürlich können Sie diese defaults aber jederzeit auf Ihre Bedürfnisse anpassen - und zwar indem Sie der `geom_`-Funktion einige Argumente in der Klammer mitgeben. Wollen Sie zum beispiel dass Ihnen `ggplot` eine Linie auf Basis eines simplen linearen Modells ohne Angabe des Vertrauensbereichs erstellt, dann müssten Sie der `geom()`-Funktion in Klammern die Argumente "method = "lm"" (für "linear model") und "se" (für "standard error") = FALSE mitgeben: -->
+Sie erinnern sich vielleicht - auf der y-Achse findet sich hier die Variable `wdi_lifexp` - also die Lebenserwartung - und auf der x-Achse die Variable `wdi_dgovhexp` - also die öffentlichen Gesundheitsausgaben. An der Stelle noch ein kurzer Hinweis: Ich hatte im letzten Video die Fehlermeldung ignoriert, die in der Console ausgegeben wird, sobald der Befehl ausgeführt wird. Die Meldung teilt Ihnen im Prinzip mit, dass sich in Ihrem Datensatz fehlende Werte befinden - dass es also in unserem Falle wohl Länder im Datensatz gibt, für die keine Angaben zu den Variablen vorliegen. Das sollten Sie natürlich prüfen und berücksichtigen wenn Sie inhaltliche Analysen durchführen - ich ignoriere diese Fehlermeldung aber an dieser Stelle, weil es hier nur um die Darstellungen mit `ggplot` geht. 
 
-<!-- ```{r} -->
-<!-- p + geom_smooth(method = "lm", se = FALSE) -->
-<!-- ``` -->
+Schauen wir uns das Streudiagramm einmal näher an. Im vorliegenden Fall wird ein gewisser Zusammenhang zwischen den beiden verwendeten Variablen recht schnell deutlich - häufig ist es allerdings gar nicht so einfach, Muster aus Streudiagrammen abzulesen - und zwar vor allem dann, wenn Sie mit hohen Fallzahlen arbeiten und sich im Diagramm viele Punkte gegenseitig überlagern. In solchen Fällen sind Trendlinien, Regressionsgeraden oder Glättungslinien oft hilfreich. 
 
-<!-- Die Linie entspricht nun der Regressionlinie aus einem einfachen linearen Regressionsmodell. Während die Regressionslinie Ihnen dabei helfen kann, Muster aus Ihren Daten zu identifizieren, hat sie natürlich auch einen entscheidenden Nachteil: Sie beschreibt die Punktwolke zwar so genau es im Rahmen der gewählten Methode eben geht, die Ausreißer und Abweichungen von dieser Linie sind aber nun nicht mehr sichtbar. In diesem Sinne kann es überaus sinnvoll sein, die Linie über die jeweilige Punktwolke zu legen. Nichts einfacher als das - um dies zu tun, fügen Sie Ihrem Befehl einfach die Funktion "geom_point()" wieder hinzu: -->
+In ggplot ist dafür die geometrische Funktion `geom_smooth()` vorgesehen, die dem Plot eine Regressionslinie hinzufügt, die das zugrunde liegende Muster in den Daten am beschreibt. Wir probieren das einmal aus, indem wir statt der Funktion `geom_point()` die Funktion `geom_smooth()` verwenden:
 
-<!-- ```{r} -->
-<!-- p + geom_smooth(method = "lm", se = FALSE) + -->
-<!--   geom_point() -->
-<!-- ``` -->
+```{r}
+# Schätzlinie darstellen
+p + geom_smooth()
+```
 
-<!-- Und schon haben Sie beide Informationen in einem Plot. Wenn Sie nun genau hinsehen, sind zwei Interessante Dinge zu beobachten. Erstens können Sie an einigen Stellen erkennen, dass die Linie nicht - wie ich eben angekündigt hatte - ÜBER den Punkten liegt sondern darunter. Das verdeutlicht nochmals die Grundlogik von ggplot2, wonach die Plots aus verschiedenen Ebenen bestehen, die übereinander gelegt werden. Sie können sich die Darstellung wie ein Bild vorstellen: Malen oder zeichnen Sie die Linie vor den Punkten, dann liegen die Punkte zwangsläufig über der Linie. Malen oder zeichnen Sie zuerst die Punkte und dann die Linie, ist es eben andersrum. Tauschen wir also die Reihenfolge einmal durch und verwenden erst "geom_point" und dann "geom_smooth": -->
+Wie Sie der Ausgabe entnehmen können, wurden nun keine Punkte mehr gezeichnet sondern eine sogenannte geglättete Linie. Allerdings hat `ggplot` nicht nur eine Linie, sondern auch gleich einen Vertrauensbereich - also das graue Band um die Linie herum - erstellt. Dieses Band zeigt den den Standardfehler für die Linie an. 
 
-<!-- ```{r} -->
-<!-- p + geom_point() + -->
-<!--   geom_smooth(method = "lm", se = FALSE) -->
-<!-- ``` -->
+Ein Blick auf die Meldung in der Konsole gibt Ihnen Auskunft darüber, dass für die Berechnung der Linie eine bestimmte Methode verwendet wurde - in diesem Fall wurde als Glättungsverfahren der LOESS-Algorithmus verwendet, der auf einer lokal gewichteten Regressionsfunktion beruht. Da Sie `ggplot` in der Funktion `geom_smooth()` weder mitgeteilt haben, welche Methode verwendet werden soll, noch dass ein Vertauensbereich dargestellt werden soll, muss es sich bei diesen beiden Punkten also wieder um vordefinierte Standardeinstellungen handeln. Ich hatte ja bereits in den letzten Videos darauf hingewiesen, dass sich die Entwickler von `ggplot` viele Gedanken über sinnvolle default-Einstellungen gemacht haben, die in vielen Fällen den Bedürfnissen der Nutzern entsprechen. Natürlich können Sie diese defaults aber auch jederzeit auf Ihre Bedürfnisse anpassen - und zwar indem Sie der `geom_`-Funktion einige Argumente in der Klammer mitgeben. Wollen Sie zum Beispiel dass Ihnen `ggplot` eine Linie auf Basis eines simplen linearen Modells ohne Angabe des Vertrauensbereichs erstellt, dann müssten Sie der `geom()`-Funktion in Klammern die Argumente "method = "lm"" (für "linear model") und "se" (für "standard error") = FALSE mitgeben:
 
-<!-- Und schon ist die Linie über den Punkten. Zweitens fällt bei genauerem Hinsehen auf, dass sich die Skalierung verändert hat, nachdem wir wieder die Punkte in das ggplot aufgenommen haben. Schauen wir uns das nochmal an indem wir die Darstellung mit Punkten und Linien neben die Darstellung legen, die nur die Linie enthält. Dafür verwenden wir ein Paket namens "Patchwork", das ich Ihnen in einem späteren Video noch genauer erläutern werde. Für den Augenblick reicht es zu wissen, dass dieses Paket einfach mehrere Plots gleichzeitig über- und nebeneinander darstellen kann. -->
+```{r}
+# Regressionsgerade aus einem linearen Modell - ohne Vertrauensbereich
+p + geom_smooth(method = "lm", se = FALSE)
+```
 
-<!-- ```{r} -->
-<!-- library(patchwork) -->
-<!-- p1 <- p + geom_point() + -->
-<!--   geom_smooth(method = "lm", se = FALSE) -->
-<!-- p2 <- p + geom_smooth(method = "lm", se = FALSE) -->
+Die Linie entspricht nun der Regressionlinie aus einem einfachen linearen Regressionsmodell. Während die Regressionslinie Ihnen dabei helfen kann, Muster aus Ihren Daten zu identifizieren, hat sie natürlich auch einen entscheidenden Nachteil: Sie beschreibt die Punktwolke zwar so genau es im Rahmen der gewählten Methode eben geht, die Ausreißer und Abweichungen von dieser Linie sind aber nun nicht mehr sichtbar. In diesem Sinne kann es überaus sinnvoll sein, die Linie über die jeweilige Punktwolke zu legen. Nichts einfacher als das - um dies zu tun, fügen Sie Ihrem Befehl einfach die Funktion "geom_point()" wieder hinzu:
 
-<!-- p1 | p2 -->
+```{r}
+# Punkte und Regressionsgerade darstellen
+p + geom_smooth(method = "lm", se = FALSE) +
+  geom_point()
+```
 
-<!-- ``` -->
-<!-- Es ist relativ leicht zu erkennen, dass die beiden Darstellungen nicht die selbe Skalierung aufweisen. Links geht die y-Achse beispielsweise von etwas unter 55 bis 90 während sie rechts von knapp unter 65 bis knapp unter 90 reicht. Auch hier sind die vordefinierten Standardeinstellungen von ggplot am Werke, die dafür sorgen, dass die Skalierung mehr oder weniger optimal an die Daten angepasst wird, die im jeweiligen Diagramm verwendet werden. Da in dem Diagramm auf der rechten Seite nur die Linie dargestellt wird und nicht die Punkte, ist es in einer gewissen Weise nicht notwendig, eine breitere Skalierung zu verwenden. Das ist im Prinzip auch okay so, kann allerdings durchaus verwirren - vor allem wenn man, wie hier, mehrere Plots nebeneinander legt. Deswegen muss die Skalierung natürlich auch anpassbar sein - und natürlich ist sie es auch. -->
+Und schon haben Sie beide Informationen in einem Plot. Wenn Sie nun genau hinsehen, sind zwei Interessante Dinge zu beobachten. Erstens können Sie an einigen Stellen erkennen, dass die Linie nicht - wie ich eben angekündigt hatte - ÜBER den Punkten liegt sondern darunter. Das verdeutlicht nochmals die Grundlogik von `ggplot2`, wonach die Plots aus verschiedenen Ebenen bestehen, die übereinander gelegt werden. Sie können sich die Darstellung wie ein Bild vorstellen: Malen oder zeichnen Sie die Linie vor den Punkten, dann liegen die Punkte zwangsläufig über der Linie. Malen oder zeichnen Sie zuerst die Punkte und dann die Linie, ist es eben andersrum. Tauschen wir also die Reihenfolge einmal durch und verwenden erst `geom_point()` und dann `geom_smooth()`:
 
-<!-- ## Scale -->
+```{r}
+# Regressionsgerade ÜBER die Punkten legen
+p + geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
 
-<!-- Hier kommt nun die "scale()"-Funktion ins Spiel. Berachten Sie, dass wir diese Funktion bisher noch gar nicht verwendet hatten - ggplot hat also ohne jede Aufforderung automatisch eine passende Skalierung gewählt und eine entsprechende Beschriftung eingefügt. -->
-<!-- Um die Skalierung anzupassen hält ggplot zahlreiche scale-Funktionen bereit - einen Überblick erhalten Sie am einfachsten über die ggplot-Referenz im Internet unter [https://ggplot2.tidyverse.org/reference/] oder indem Sie -->
+Und schon ist die Linie über den Punkten. Zweitens fällt bei genauerem Hinsehen auf, dass sich die Skalierung verändert hat, nachdem wir wieder die Punkte in das ggplot aufgenommen haben. Schauen wir uns das nochmal an indem wir die Darstellung mit Punkten und Linien neben die Darstellung legen, die nur die Linie enthält. Dafür verwenden wir ein Paket namens `patchwork`, das ich Ihnen in einem späteren Video noch genauer erläutern werde. Für den Augenblick reicht es zu wissen, dass dieses Paket einfach mehrere Plots gleichzeitig über- und nebeneinander darstellen kann.
 
-<!-- ```{r} -->
-<!-- ??scale_ -->
-<!-- ``` -->
-<!-- eintippen und sich alle scale-Funktionen des ggplot-Pakets anschauen. Dazu müssen Sie im Hilfe-Fenster zu den entsprechenden ggplot-Funktionen scrollen und können sich dann mit einem Klick weitere Details dazu anschauen. -->
+```{r}
+# patchwork laden
+library(patchwork)
 
-<!-- Es ist zugegbenermaßen anfangs etwas schwierig, die "richtige" scale()-Funktion für den jeweiligen Bedarf zu finden. Im Prinzip steckt die Lösung aber meistens in der Bezeichnung der jeweiligen Funktionen. Beispielsweise gibt es einige scale_color()-Funktionen, die offenkundig etwas mit den Farbskalen zu tun haben, die in der Abbildung verwendet werden. Dazu kommen wir später noch. Andere Funktionen beziehen sich auf die Größe oder die Form von Objekten (scale_size_... und scale_shape...). Wir wollen in dem Fall aber die x- und y-Achsen anpassen. Hierfür stehen eine Reihe von scale_x_- bzw. scale_y_-Funktionen zur Verfügung. Weil beide Variablen aus unserem Beispiel kontinuerliche Variablen sind, verwenden wir zur Anpassung also die scale_x_continous()-Funktion. Im Falle von kategorialen Variablen würden wir die scale_x_discrete()-Funktion verwenden. Zudem stehen noch weitere Funktionen - zum Beispiel für Datumsformate - zur Verfügung. -->
+# Zwei Diagramme nebeneinander darstellen
+p1 <- p + geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+p2 <- p + geom_smooth(method = "lm", se = FALSE)
 
-<!-- Passen wir nun also die Saklierung der x-und y-Achse an. Dafür benötigen wir die Funktionen scale_x_continous() und scale_y_continous(). Mit dem Argument "limits" lassen sich nun die Endpunkte der Skalierung anpassen. Wenn wir beispielsweise wollen, dass beide Achsen einen Wertebereich zwischen 0 und 100 abdecken, dann würden wir folgendermaßen vorgehen: -->
+p1 | p2
+```
+Es ist relativ leicht zu erkennen, dass die beiden Darstellungen nicht die selbe Skalierung aufweisen. Links geht die y-Achse beispielsweise von etwas unter 55 bis 90 während sie rechts von knapp unter 65 bis knapp unter 90 reicht. Auch hier sind die vordefinierten Standardeinstellungen von `ggplot` am Werke, die dafür sorgen, dass die Skalierung mehr oder weniger optimal an die Daten angepasst wird, die im jeweiligen Diagramm verwendet werden. Da in dem Diagramm auf der rechten Seite nur die Linie dargestellt wird und nicht die Punkte, ist es in einer gewissen Weise nicht notwendig, eine breitere Skalierung zu verwenden. Das ist im Prinzip auch okay so, kann allerdings durchaus auch verwirrend sein - vor allem wenn man, wie hier, mehrere Plots nebeneinander legt. Deswegen muss die Skalierung natürlich auch anpassbar sein - und natürlich ist sie es auch. Wie das funktioniert, schauen wir uns jetzt einmal genauer an:
 
-<!-- ```{r} -->
-<!-- p + scale_x_continuous(limits = c(0, 100)) + -->
-<!--   scale_y_continuous(limits = c(0, 100)) -->
-<!-- ``` -->
+## Die scale()-Funktion {#scale}
 
-<!-- Für unser vorliegendes Beispiel ist eine so breite Skalierung nicht nötig, hier reicht uns ein Wertebereich von 0 bis 13 auf der x-Achse und von 50 bis 90 auf der y-Achse. Wie wir nun erkennen weißen beide Plots - das Punktdiagramm und die Darstellung der Regressionslinie - die selbe Skalierung auf: -->
+Hier kommt nun die `scale()`-Funktion ins Spiel. Beachten Sie, dass wir diese Funktion bisher noch gar nicht verwendet hatten - ggplot hat also ohne jede Aufforderung automatisch eine passende Skalierung gewählt und eine entsprechende Beschriftung eingefügt.
+Um die Skalierung anzupassen hält `ggplot` zahlreiche scale-Funktionen bereit - einen Überblick erhalten Sie am einfachsten über die `ggplot`-Referenz auf den tidyverse-Seiten im Internet (unter [https://ggplot2.tidyverse.org/reference/]) oder indem Sie
 
-<!-- ```{r} -->
+```{r}
+# help.search()-Funktion von R verwenden (?? ist gleichbedeutend mit help.search())
+??scale_
+```
+eintippen und sich alle scale-Funktionen des ggplot-Pakets anschauen. Dazu müssen Sie im Hilfe-Fenster zu den entsprechenden ggplot-Funktionen scrollen - diese erkennen Sie durch das Praäxi "gglot2::" - und können sich dann mit einem Klick weitere Details dazu anschauen.
 
-<!-- p + geom_point() + -->
-<!--   scale_x_continuous(limits = c(0, 13)) + -->
-<!--   scale_y_continuous(limits = c(50, 90)) -->
+Es ist zugegbenermaßen anfangs etwas schwierig, die "richtige" `scale()`-Funktion für den jeweiligen Bedarf zu finden. Im Prinzip steckt die Lösung aber meistens in der Bezeichnung der jeweiligen Funktionen. Beispielsweise gibt es einige `scale_color()`-Funktionen, die offenkundig etwas mit den Farbskalen zu tun haben, die in der Abbildung verwendet werden. Andere Funktionen beziehen sich auf die Größe oder die Form von Objekten - beispielsweise `scale_size_...` oder `scale_shape...`. Wir wollen in dem Fall aber die x- und y-Achsen anpassen. Hierfür stehen eine Reihe von `scale_x_`- bzw. `scale_y_`-Funktionen zur Verfügung. 
 
-<!-- p + geom_smooth(method = "lm", se = FALSE) + -->
-<!--   scale_x_continuous(limits = c(0, 13)) + -->
-<!--   scale_y_continuous(limits = c(50, 90)) -->
+Weil beide Variablen aus unserem Beispiel kontinuierliche Variablen sind, verwenden wir zur Anpassung also die `scale_x_continous()`-Funktion. Im Falle von kategorialen Variablen würden wir die `scale_x_discrete()`-Funktion verwenden. 
 
-<!-- ``` -->
-<!-- Noch deutlicher wird es, wenn wir die beiden Darstellungen wieder nebeneinander legen: -->
+Passen wir jetzt also die Saklierung der x-und y-Achse an. Dafür benötigen wir die Funktionen `scale_x_continous()` und `scale_y_continous()`. Mit dem Argument "limits" lassen sich nun die Endpunkte der Skalierung anpassen. Wenn wir beispielsweise wollen, dass beide Achsen einen Wertebereich zwischen 0 und 100 abdecken, dann würden wir folgendermaßen vorgehen:
 
-<!-- ```{r} -->
-<!-- p1 <- p + geom_point() + -->
-<!--   geom_smooth(method = "lm", se = FALSE) + -->
-<!--   scale_x_continuous(limits = c(0, 13)) + -->
-<!--   scale_y_continuous(limits = c(50, 90)) -->
+```{r}
+# Koordinatensystem mit einer Skalierung von 0 bis 100 auf beiden Achsen
+p + scale_x_continuous(limits = c(0, 100)) +
+  scale_y_continuous(limits = c(0, 100))
+```
 
-<!-- p2 <- p + geom_smooth(method = "lm", se = FALSE) + -->
-<!--   scale_x_continuous(limits = c(0, 13)) + -->
-<!--   scale_y_continuous(limits = c(50, 90)) -->
+Sie sehen in der Ausgabe rechts unten, dass nun beide Achsen von 0 bis 100 reichen. Für unser vorliegendes Beispiel ist eine so breite Skalierung nicht nötig, hier reicht uns ein Wertebereich von 0 bis etwa 13 auf der x-Achse und von 50 bis 90 auf der y-Achse. Wenn wir diese Festlegung nun für beide Plots gleichermaßen treffen, dann weisen sowohl das Streudiagramm als auch die Darstellung der Regressionslinie die selbe Skalierung auf. Hier einmal das Streudiagramm:
 
-<!-- p1 | p2 -->
-<!-- ``` -->
-<!-- Nun können Sie natürlich nicht nur die Endpiunkte der Skalierung manuell festlegen sondern auch den Intervall, der abgebildet werden soll. Hierfür verwenden Sie das Argument "breaks" innerhalb der scale_continuous-Funktion. Wenn Sie z.B. auf der y-Achse statt des autmatisch ausgewählten 10er-Intervalls lieber ein 5-er Intervall angezeigt haben würden, dann könnten Sie dies folgendermaßen tun: -->
+```{r}
+# Streudiagramm mit manuell festgelegter Skalierung der beiden Achsen
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13)) +
+  scale_y_continuous(limits = c(50, 90))
+```
+
+Und hier das Diagramm mit der Regressionslinie:
+
+```{r}
+# Regressionslinie mit manuell festgelegter Skalierung der beiden Achsen
+p + geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(limits = c(0, 13)) +
+  scale_y_continuous(limits = c(50, 90))
+```
+Noch deutlicher wird es, wenn wir die beiden Darstellungen wieder mit `patchwork` nebeneinander legen:
+
+```{r}
+# Beide Diagramme nebeneinander darstellen
+p1 <- p + geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(limits = c(0, 13)) +
+  scale_y_continuous(limits = c(50, 90))
+
+p2 <- p + geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(limits = c(0, 13)) +
+  scale_y_continuous(limits = c(50, 90))
+
+p1 | p2
+```
+
+Das wäre also geschafft. Nun können Sie natürlich aber nicht nur die Endpunkte der Skalierung manuell festlegen sondern auch den Intervall, der abgebildet werden soll. Hierfür verwenden Sie das Argument "breaks" innerhalb der `scale_continuous`-Funktion. Wenn Sie z.B. auf der y-Achse statt des automatisch ausgewählten 10er-Intervalls lieber ein 5-er Intervall angezeigt haben würden, dann könnten Sie dies folgendermaßen tun: Hier einmal die Variante mit automatisch erstelltem 10er-Intervall:
+
+```{r}
+# 10er-Intervall auf der y-Achse (in diesem Fall per default festgelegt)
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13)) +
+  scale_y_continuous(limits = c(50, 90))
+```
+
+Und hier die Variante mit einem 5er- Intervall:
+
+```{r}
+# Manuell festgelegtes 5er-Intervall auf der y-Achse
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13)) +
+  scale_y_continuous(limits = c(50, 90), breaks = c(50, 55, 60, 65, 70, 75, 80, 85, 90))
+```
+
+Das sieht etwas mühsam und unnötig kompliziert aus - und das ist es auch. Einfacher ist es, wenn Sie sich hier einer Funktion bedienen, die automatisch eine Sequenz von Daten nach einem vorgebenden Muster generiert. Wenn Sie beispielsweise die oben dargestellte Zahlenreihe automatisch generieren wollen, dann übergeben Sie der Funktion `seq()` einfach den Anfangs- und Endpunkt der Zahlenreihe sowie das gewünschte Intervall. In diesem Fall also den Anfangswert 50, den Endwert 90 und das Intervall von 5:
+
+```{r}
+# Sequenz-Funktion verwenden:
+seq(from = 50, to = 90, by = 5)
+```
+
+Zum selben Ergebnis kommen Sie mit dieser deutlich kürzeren - aber auch etwas "leserunfreundlicheren" Variante:
+
+```{r}
+# Sequenz-Funktion in kürzerer Schreibweise (from, to, by)
+seq(50,90,5)
+```
+
+Legen wir also nun für unser Beispiel ein 5-er Intervall für die y-Achse und ein 2er-Intervall für die x-Achse fest:
+
+```{r}
+# Streudiagramm mit manuell festgelegten Skalengrenzen und -intervallen
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13),
+                     breaks = seq(0, 13, 2)) +
+  scale_y_continuous(limits = c(50, 90),
+                     breaks = seq(50, 90, 5))
+```
+
+Nun zu einem kleinen Trick: Wenn Sie wissen möchten, welche Argumente Sie in einer Funktion noch so verwenden können, dann können Sie einfach innerhalb der Funktion - am besten direkt am Anfang oder nach einem Komma - die "Tab"-Taste drücken und erhalten dann ein Dropdown-Menü, in dem Ihnen die zur Verfügung stehenden Argumente angezeigt werden. Natürlich empfiehlt sich fürs Detail hier auch ein Blick in die Referenz bzw. die Dokumentation des Pakets - insbesondere wenn Sie sich nicht mehr ganz sicher sind, wie ein Argument genau bezeichnet ist, ist der Weg den ich Ihnen hier zeige, aber häufig der schnellere. 
+
+Wenn Sie dann noch mit der Maus über eines der Argumente fahren, dann werden weitere Erläuterungen dazu eingeblendet. Wie Sie sehen können, gibt es noch eine Vielzahl weiterer Argumente in dieser Liste, mit deren Hilfe Sie Ihre Abbildung anpassen können. Wir können an dieser Stelle nicht auf alle eingehen, schauen uns aber noch das Argument "name" an - mit diesem können Sie nämlich die Bezeichnung der Achse steuern. Der angezeigte Hilfetext teilt Ihnen mit, dass per default einfach der Name der jeweiligen Variable angezeigt wird - das war ja bei den bisherigen Plots auch der Fall. Sie können aber natürlich auch andere - etwas sprechendere - Namen vergeben - nehmen wir mal "Gesundheitsausgaben" auf der x-Achse und "Lebenserwartung" auf der y-Achse. 
+
+```{r}
+# Achsen neu bennenen 
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13),
+                     breaks = seq(0, 13, 2),
+                     name = "Gesundheitsausgaben") +
+  scale_y_continuous(limits = c(50, 90),
+                     breaks = seq(50, 90, 5),
+                     name = "Lebenserwartung")
+```
+
+Übrigens - und das ist typisch für R - ist das nicht die einzige Möglichkeit um die Beschriftung der Achsen zu verändern. Dafür können Sie auch die ggplot-Funktion `labs()` verwenden, die speziell für die Beschriftung von ggplot-Grafiken erstellt wurde. Hiermit können Sie nicht nur die Achsen beschriften sondern auch einen Titel ("title") bzw. Untertitel ("subtitle") oder eine Bildunterschrift ("caption") erstellen:
+
+```{r}
+# Weitere Beschriftungen hinzufügen
+p + geom_point() +
+  scale_x_continuous(limits = c(0, 13),
+                     breaks = seq(0, 13, 2)) +
+  scale_y_continuous(limits = c(50, 90),
+                     breaks = seq(50, 90, 5)) +
+  labs(x = "Gesundheitsausgaben",
+       y = "Lebenserwartung",
+       title = "Überschrift",
+       subtitle = "Unterüberschrift",
+       caption = "Quelle: QOG")
+```
+
+Wie Sie sich sicher denken können sind noch zahlreiche weitere Skalentransformationen mit `ggplot` möglich - für den Moment belassen wir es aber einmal dabei. Ich möchte Ihnen nämlich noch zeigen, wie Sie weitere Variablen in Ihre Darstellung einbeziehen können.
+
+## Drei und mehr Variablen verwenden {#drei}
+
+Bisher haben wir uns den Zusammenhang zwischen den Gesundheitsausgaben einiger Länder und der Lebenswerwartung in den Ländern angeschaut. Jetzt könnte es interessant sein, etwas mehr über die einzelnen Punkte zu erfahren - beispielsweise welche Länder sich konkret dahinter verbergen oder ob sich auf der Basis des Streudiagramms Erkenntnisse bezüglich bestimmter regionaler Häufungen ziehen lassen. Starten wir damit, Informationen über die Länder zu erhalten.
+
+Eine Möglichkeit dafür bestünde darin, die Punkte in Abhängigkeit des Ländernamens oder eine Länder-ID unterschiedlich einzufärben. Im Quality of Government-Datensatz existieren dafür mehrere Variablen - zum Beispiel die folgenden Variablen, die Abkürzungen, einen bestimmten Ländercode und den Namen der Länder enthalten:
+
+```{r}
+# Variablen zur Identifikation einzelner Länder
+qog %>%
+  select(ccodealp, ccode, cname) %>%
+  head()
+```
+
+Nehmen wir also den ursprünglichen Code wieder zur Hand und versuchen die Punkte in Abhängigkeit des Länderkürzels "ccodealp" einzufärben. Dazu fügen wir der Funktion `aes()` das Argument "colour" hinzu und übergeben hier die entsprechende Variable. Hier geschieht wieder ein "Mapping" - also eine Zuordnung der Werte einer Variable zu einer bestimmten Darstellungsform - in dem Fall zur Farbe:
+
+```{r}
+# Länder einfärben
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, colour = ccodealp))
+p + geom_point()
+```
+
+Hups - was ist hier passiert? Nun, ggplot hat in der Tat die Punkte unterschiedlich eingefärbt und automatisch eine Legende hinzugefügt. Sonderlich hilfreich ist das in diesem Fall allerdings nicht, denn der Datensatz beinhaltet einfach zu viele Länder. So wird erstens die Legende viel zu groß - das eigentliche Streudiagramm wird bei uns hier sogar erst durch einen Klick auf "Zoom" sichtbar. 
+
+Zweitens lassen sich die Punkte nicht gut voneinander unterscheiden, da die Farben zu ähnlich sind. Wären nur 5 oder zehn Länder in dem Datensatz würde das ganz prima funktionieren - im vorliegenden Fall leider nicht. Was Sie aber wieder sehen können, ist dass R per default bereits eine Farbskala gewählt hat und eine Legende hinzugefügt hat. Natürlich lassen sich auch Farben und Legenden noch anpassen - jetzt versuchen wir aber erstmal die Ländernamen auf eine andere Weise abzubilden. Dazu verwenden wir diesmal das Argument "label" innerhalb der Funktion `aes()`. Wenn wir dann das Streudiagramm neu erstellen, passiert erstmal...
+
+```{r}
+# Länderkürzel darstellen
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, label = ccodealp))
+p + geom_point()
+```
+...nichts, da das Argument "label" alleine für die Punktdarstellung keine Konsequenzen hat. Fügen wir aber nun das geom "label" hinzu, werden die Punkte "gelabelt" - oder eben benannt:
+
+```{r}
+# geom_label() hinzufügen
+p + geom_point() +
+  geom_label()
+```
+Hier wurden nun "Labels" erstellt die ein wenig an bedruckte Etiketten erinnern. Aufgrund der großen Anzahl an Ländern ist auch dies nun wenig hilfreich, wenngleich zumindest einzelne Länder nun einfacher zu erkennen sind. Eine mögliche Alternative bestünde nun darin, das geom "text" zu verwenden, wodurch nur der Text dargestellt wird - ohne eine Umrandung und Einfärbung:
+
+```{r}
+# Text statt "labels" verwenden
+p + geom_text()
+```
+Auch noch nicht so viel besser. Letzter Versuch: Die Verwendung des Pakets ggrepel - einer Erweitwerung von ggplot, das Labels erstellt, die sich gegenseitig nicht überlappen sollen:
+
+```{r}
+# Verwendung des Pakets "ggrepel"
+library(ggrepel)
+
+p + 
+  geom_point() +
+  geom_text_repel(max.overlaps = Inf) # max.overlapps = Inf - ohne dieses Argument würden überlappende
+                                      # labels ggf. nicht angezeigt werden
+  #geom_label_repel(max.overlaps = Inf)
+```
+
+Okay, auch das funktioniert nicht wirklich gut. Es sind einfach zu viele Datenpunkte auf der Abbildung. Dennoch haben Sie nun mehrere nützliche Möglichkeiten gesehen, die sie verwenden könnten, wenn Sie etwas weniger Daten in ihrem Datensatz haben. Für den vorliegenden Fall ist es vermutlich sinnvoller, nicht nach einzelnen Ländern sondern nach anderen Merkmalen zu unterscheiden. Gibt es Variablen in unseren Daten, die sinnvollerweise auf die Farbästhetik abgebildet werden können? Wir könnten beispielsweise versuchen, die Datenpunkte nach dem Kontinent einzufärben, auf dem sich die jeweiligen Länder befinden. Bitte beachten Sie hierbei, dass die Originalversion des Quality of Government-Datensatzes keine Kontinent-Variable beinhaltet. Ich habe aber in unseren Auszugs-Datensatz eine solche Variable namens "continent" hinzugefügt. Und nun fügen wir diese Variable einmal zu unserem "color="-Argument hinzu:
+
+```{r}
+# Einfärbung der Punkte nach Kontinenten
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, colour = continent))
+p + geom_point()
+```
+
+Hier wurden nun die einzelnen Datenpunkte nach Kontinenten eingefärbt, und eine Legende mit einem Schlüssel zu den Farben wurde automatisch hinzugefügt. Das sieht schon sehr viel besser und handlicher aus. Und: Jetzt können Sie sich wieder auf die Suche nach einem Muster machen - beispielsweise clustern die afrikanischen Länder (rot) erkennbar links unten und die europäischen Länder rechts oben.
+
+Und weil es so schön ist, nehmen wir jetzt gleich noch eine vierte Variable mit in den Plot auf - und zwar die Größe der jeweiligen Länder. Zu diesem Zweck könnte es ja durchaus ganz nützlich sein, die Größe der Punkte in Abhängigkeit der Einwohnerzahl der Länder abzubilden. Auch hierfür müssen wir wieder das Mapping-Argument in der Aesthetics-Funktion erweitern, und zwar fügen wir nun das Argument "size=" hinzu und lassen die Größe der Punkte durch die Variable "wdi_pop" (für Population) steuern:
+
+```{r}
+# Punktgröße in Abhängigkeit der Einwohnerzahlen der jeweiligen Länder variieren
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, color = continent))
+p + geom_point() 
+```
+
+Und siehe da - die Punkte sind zum einen eingefärbt und zum anderen unterschiedlich groß - und es wurde eine zusätzliche Legende mit einem Schlüssel für die Größe der Punkte hinzufügt. Zugegeben, hier sind die Voreinstellungen von `ggplot` nicht sonderlich hilfreich, weil die Skalierung und Benennung wenig informativ ist. Aber wir haben ja schon gelernt, dass sich die Skalierung relativ einfach anpassen lässt. Da es sich hier nun um die Größe der Punkte handelt, verwenden wir die Funktion `scale_size` und definieren hier - ähnlich wie wir es vorhin bei den x- und y-Achsen gemacht hatten - die Range für die Punktgröße neu. 
+Wir wollen beispielsweise unterschiedliche Punktgrößen für Länder mit weniger als 1.Mio Einwohner, für Länder zwischen 1 und 10 Mio. bzw. 10 und 100 Mio. und für Länder mit mehr als 100 Mio. Einwohner. Dafür definieren wir im Argument "breaks=" die entsprechenden Werte. Und damit die Beschriftung der Legende ein wenig sprechender wird, verwenden wir das Argument "labels=" um die entsprechenden Bezeichnungen hinzuzufügen:
+
+```{r}
+# Skalierung der Punktgröße anpassen
+p + geom_point() +
+  scale_size(breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio."))
+```
+
+Schon besser! Was mich jetzt allerdings noch ein wenig stört ist die Tatsache, dass sich einige Punkte jetzt etwas überlagern oder überlappen und daher nicht mehr gut voneinander zu unterscheiden sind. Daher nehmen wir noch zwei weitere Anpassungen vor. 
+
+## Darstellung verbessern {#verbessern}
+
+Erstens möchte ich, dass die Punkte besser voneinander zu unterscheiden sind und wähle daher eine andere Punktform. Das geht am besten indem innerhalb der `geom_point()`-Funktion eine spezielle Form - also der "shape" - der Punkte festgelegt wird. Beispielsweise liefert Ihnen die Angabe von "shape=21" keine gefüllten Punkte mehr, sondern umrandete Punkte:
+
+```{r}
+# Umrandete Punkte verwenden
+p + geom_point(shape = 21) +
+  scale_size(breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio."))
+```
+
+Sie sehen - die Punkte sind nun farblich umrandet aber nicht mehr gefüllt. Dass diese Form nun die Nummer 21 hat, können Sie natürlich nicht von vorneherein wissen - im Internet oder in Lehbüchern zu R finden Sie aber zahlreiche Übersichten über die zur Auswahl stehenden Formen. Sie können aber auch einfach herumprobieren, so wie ich das hier einmal mache...
+
+```{r}
+# Unterschiedliche Formen ("shapes") ausprobieren
+p + 
+  geom_point(shape = 3) +
+  #geom_point(shape = 7) +
+  #geom_point(shape = 10) +
+  #geom_point(shape = 21) +
+  scale_size(breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio."))
+```
+
+Aber kommen wir zurück zur "shape 21". Warum sind die Punkte hier eigentlich nicht mehr gefüllt sondern farblich umrandet? Dafür müssen wir uns nochmal das ursprüngliche Mapping anschauen. Hier hatten wir ja festgelegt, dass die Punkte in Abhängigkeit des Kontinents eingefärbt werden sollen. Die "Form 21" interpretiert das nun so, dass der Rand der Punkte eingefärbt wird - nicht aber die Punkte selbst. Wollen wir dagegen die Punkte einfärben, dann müssen wir `ggplot` in diesem Fall mitteilen, dass die Punkte entsprechend "gefüllt" werden sollen - und zwar mit dem "fill="-Argument: 
+
+```{r}
+# Punkte mit "fill=" einfärben
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, 
+                     #color = continent
+                     fill = continent
+                     ))
+
+p + geom_point(shape = 21) +
+  scale_size(breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio."))
+```
+
+Siehe da - nun sind die Punkte wieder entsprechend eingefärbt und dazu - per Voreinstellung - schwarz umrandet. So lassen sie sich gut voneinander unterscheiden. Übrigens: Wenn Sie sowohl dem Farbargument als auch dem fill()-argument die Variable "continent" übergeben, werden die Punkte entsprechend gefüllt und umrandet. 
+
+```{r}
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, 
+                     color = continent,
+                     fill = continent
+                     ))
+
+p + geom_point(shape = 21) +
+  scale_size(breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio."))
+```
+
+Aber das wollen wir ja nicht, daher machen wir das gleich wieder rückgängig. 
+
+Vorhin hatte ich gesagt, dass ich gerne zwei Anpassungen vornehmen möchte - und die zweite betrifft die Transparenz bzw. Deckkraft der Punkte. Diese können Sie mit dem Argument "alpha=" steuern. Dabei können sie Werte zwischen 0 und 1 setzen. Ein Objekt mit einem Alpha-Wert von Null ist vollständig transparent. Ein Objekt mit einem Alpha von eins ist vollständig undurchsichtig. Probieren wir das mal aus:
+
+```{r}
+# Transparenz der Füllung festlegen
+p + geom_point(shape = 21, 
+                alpha = 0.75
+                #alpha = 0.50
+                # alpha = 0.25
+                # alpha = 0.05
+               ) +
+  scale_size(breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio."))
+```
+
+Denken Sie hierbei bitte an die "amerikanische" Dezimalschreibweise mit einem Punkt als Dezimaltrenner!
+
+Die Verwendung von Transparenten Objekten ist dabei übrigens nicht nur eine graphische Spielerei, vielmehr können transparente Objekte sehr nützlich sein, wenn viele sich Punkte oder Objekte überlappen - wenn es also zum sog. Overplotting kommt. 
+
+Jetzt packen wir zum Schluss alles, was wir heute gelernt haben, in einen großen ggplot-Befehl:
+
+```{r}
+# All in One
+p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, fill = continent))
+p + geom_point(shape = 21, alpha = 0.7) +
+  scale_x_continuous(limits = c(0, 12),
+                     breaks = seq(0, 13, 2)) +
+  scale_y_continuous(limits = c(50, 85),
+                     breaks = seq(50, 90, 5)) +
+  scale_size(breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio.")) +
+  labs(x = "Gesundheitsausgaben in Prozent am BIP",
+       y = "Lebenserwartung",
+       size = "Einwohnerzahl",
+       fill = "Kontinent",
+       title = "Öffentliche Gesundheitsausgaben und Lebenswerwartung",
+       subtitle = "Daten aus dem Jahr 2019",
+       caption = "Quelle: QOG (Standard)") +
+  theme_minimal()
+```
+
+Jetzt haben wir ein einigermaßen ausgefeiltes Diagramm erstellt, das sich - zumindest nach meinem Empfinden - gut vorzeigen lässt!
 
 
-<!-- ```{r} -->
-<!-- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) + -->
-<!--   scale_x_continuous(limits = c(0, 13)) +  -->
-<!--   scale_y_continuous(limits = c(50, 90), breaks = c(50, 55, 60, 65, 70, 75, 80, 85, 90))  -->
-<!-- ``` -->
-<!-- Das sieht etwas mühsam und unnötig kompliziert aus - und das ist es auch. Einfacher ist es, wenn Sie sich hier der seq()- Funktion von R bedienen, die automatisch eine Sequenz von Daten nach einem vorgebenen Muster generiert. Wenn Sie beispielswesie die oben dargestellte Zahlenreihe automatisch generieren wollen, dann übergeben Sie der Funktion seq() einfach den Anfangs- und Endpunkt der Zahlenreihe sowie das gewünschte Intervall. In diesem Fall also den Anfangswert 50, den Endwert 90 und das Intervall von 5: -->
 
-<!-- ```{r} -->
-<!-- seq(from = 50, to = 90, by = 5) -->
-<!-- # Zum selben Ergebnis kommen Sie mit dieser deutlich kürzeren - aber auch etwas "leserunfreundlicheren" Variante: -->
-<!-- seq(50,90,5) -->
-<!-- ``` -->
-
-<!-- Legen wir also nun für unser Beispiel ein 5-er Intervall für die y-Achse und ein 2er-Intervall für die x-Achse fest: -->
-
-<!-- ```{r} -->
-<!-- p + geom_point() + -->
-<!--   scale_x_continuous(limits = c(0, 13),  -->
-<!--                      breaks = seq(0, 13, 2)) +  -->
-<!--   scale_y_continuous(limits = c(50, 90),  -->
-<!--                      breaks = seq(50, 90, 5))  -->
-
-<!-- ``` -->
-<!-- Nun zu einem kleinen Trick: Wenn Sie wissen möchten, welche Argumente Sie in einer Funktion noch so verwenden können, dann können Sie einfach innerhalb der Funktion - am besten direkt am Anfang oder nach einem Komma - die "Tab"-Taste drücken und erhalten dann ein Dropdown-Menü, in dem Ihnen die zur Verfügung stehenden Argumente angezeigt werden. Natürlich empfiehlt sich fürs Detail hier auch ein Blick in die Referenz bzw. die Dokumentation des Pakets, insbesondere wenn Sie sich nicht mehr ganz sicher sind, wie ein Argument genau bezeichnet ist, ist dieser Weg aber häufig der schnellste. Wenn Sie dann noch mit der Maus über eines der Argumente fahren, dann werden weitere Erläuterungen dazu eingeblendet. Wie Sie sehen können, gibt es noch eine Vielzahl weiterer Argumente in dieser Liste, mit deren Hilfe Sie Ihre Abbildung anpassen können. Wir können an dieser Stelle nicht auf alle eingehen, schauen uns aber noch das Argument "name" an - mit diesem können Sie die Bezeichnung der Achse steuern. Der angezeigte Hilfetext teilt Ihnen mit, dass per default einfach der Name der jeweiligen Variable angezeigt wird - das war ja bei den bisherigen Plots auch der Fall. Sie können aber natürlich auch andere Namen vergeben oder mit der Angabe von "NULL" die Ausgabe eines Labels unterdrücken.  -->
-
-
-<!-- ```{r} -->
-<!-- p + geom_point() + -->
-<!--   scale_x_continuous(limits = c(0, 13),  -->
-<!--                      breaks = seq(0, 13, 2), -->
-<!--                      name = "Gesundheitsausgaben") +  -->
-<!--   scale_y_continuous(limits = c(50, 90),  -->
-<!--                      breaks = seq(50, 90, 5), -->
-<!--                      name = "Lebenserwartung")  -->
-
-<!-- ``` -->
-<!-- Übrigens - und dauch das ist typisch für R - ist das nicht die einzige Möglichkeit um die Beschriftung der Achsen zu verändern. Dafür können Sie auch die ggplot-Funktion "labs()" verwenden, die speziell für die Beschriftung von ggplot-Grafiken erstellt wurde. Hiermit können Sie nicht nur die Achsen beschriften sondern auch einen Titel ("title") bzw. Untertitel ("subtitle") oder eine Bildunterschrift ("caption") erstellen, oder alle möglichen Elemente eines ggplots bennenen - beispielsweise Legenden.  -->
-
-
-<!-- ```{r} -->
-
-<!-- p + geom_point() + -->
-<!--   scale_x_continuous(limits = c(0, 13),  -->
-<!--                      breaks = seq(0, 13, 2)) +  -->
-<!--   scale_y_continuous(limits = c(50, 90),  -->
-<!--                      breaks = seq(50, 90, 5)) + -->
-<!--   labs(x = "Gesundheitsausgaben",  -->
-<!--        y = "Lebenserwartung",  -->
-<!--        title = "Überschrift",  -->
-<!--        subtitle = "Unterüberschrift",  -->
-<!--        caption = "Quelle: QOG") -->
-
-<!-- ``` -->
-
-<!-- Doch kommen wir nochmal für ein etwas spezielleres Beispiel zurück auf die verschiedenen scale()-Funktionen. Bisher haben wir nur lineare Skalen verwendet, in einigen Fällen kann es durchaus sinnvoll sein eine lineare Skala in eine logarithmische Skala umzuwandeln. Auch das geht mit ggplot2 ziemlich fix und zwar mit einer Funktion namens scale_x_log10(). Diese skaliert die x-Achse eines Diagramms auf der Basis von log 10. Um sie zu verwenden, fügen wir sie einfach zum Diagramm hinzu.  -->
-
-<!-- An dieser Stelle ein kleiner Praxistipp: Zum herumexperimentieren bietet es sich an, einzelne Codeschnipsel nicht gleich zu löschen oder zu überschreiben, sondern "auzukommentieren". Indem Sie eine Raute vor bestimmte Code-Elemente setzen bringen Sie R dazu, diese Elemente als Kommentar zu behandeln und eben nicht auszuführen. So können Sie schnell und einfach verschiedene Darstellungsvarianten ausprobieren ohne jedesmal viel Schreibarbeit zu haben. Wenn Sie mehrere Zeilen gleichzeitig auskommentieren wollen müssen Sie übrigens nicht händisch vor jede Zeile eine Raute schreiben, vielmehr können Sie dafür die betreffenden Zeilen mit der Maus oder der Tastatur markieren und dann mit dem Tastenkürzel Umschalt+Steuerung+c die Zeilen Auskommentieren (und wieder zurückbringen). -->
-
-
-<!-- ```{r} -->
-
-<!-- p + geom_point() + -->
-<!--   # scale_x_continuous(limits = c(0, 13),  -->
-<!--   #                    breaks = seq(0, 13, 2)) +  -->
-<!--   scale_x_log10() + -->
-<!--   scale_y_continuous(limits = c(50, 90), -->
-<!--                      breaks = seq(50, 90, 5)) + -->
-<!--   labs(x = "Gesundheitsausgaben",  -->
-<!--        y = "Lebenserwartung",  -->
-<!--        title = "Überschrift",  -->
-<!--        subtitle = "Unterüberschrift",  -->
-<!--        caption = "Quelle: QOG") -->
-
-
-<!-- ``` -->
-
-<!-- Wir werden uns später noch intensiver mit weiteren Skalentransformationen beschäftigen, für den Moment belassen wir es aber dabei. Im nächsten Schritt wollen wir uns nämlich erst einmal anschauen, wie wir noch weitere Variablen in die Darstellung einbeziehen können. -->
-
-<!-- Bisher haben wir uns den Zusammenhang zwischen den Gesundheitsausgaben einiger Länder und der Lebenswerwartung in den Ländern angeschaut. Jetzt könnte es interessant sein, etwas mehr über die einzelnen Punkte zu erfahren - beispielsweise welche Länder sich konkret dahinter verberger oder ob sich auf der Basis des Streudiagramms Erkenntnisse bezüglich bestimmter regionaler Häufungen ziehen lassen. Starten wir damit, Informationen über die Länder zu erhalten.  -->
-
-<!-- Eine Möglichkeit dafür bestünde darin, die Punkte in Abhängigkeit des Ländernamens oder eine Länder-ID unterschiedlich einzufärben. Im Quality of Government-Datensatz existieren dafür mehrere Variablen - zum Beispiel die Variable  -->
-
-
-<!-- ```{r} -->
-<!-- qog %>% -->
-<!--   select(ccodealp, ccode, cname) %>%  -->
-<!--   head() -->
-
-<!-- ``` -->
-
-<!-- Nehmen wir also den ursprünglichen Code wieder zur Hand und versuchen die Punkte in Abhängigkeit des Länderkürzels "ccodealp" einzufärben. Dazu fügen wir der Funktion aes das Argument "colour" hinzu und übergeben hier die entsprechende Variable. Hier geschieht wieder ein "Mapping" - also eine Zuordnung der Werte einer Variable zu einer bestimmten Darstellungsform - in dem Fall zur Farbe: -->
-
-<!-- ```{r} -->
-<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, colour = ccodealp)) -->
-<!-- p + geom_point()  -->
-
-<!-- ``` -->
-
-<!-- Hups - was ist hier passiert? Nun, ggplot hat in der Tat die Punkte unterschiedlich eingefärbt und automatisch eine Legende hinzugefügt. Sonderlich hilfreich ist das in diesem Fall allerdings nicht, denn der Datensatz beinhaltet einfach zu viele Länder. So wird erstens die Legende viel zu groß, zweitens lassen sich die Punkte nicht gut voneiander unterscheiden, da die Farben zu ähnlich sind. Wären nur 5 oder zehn Länder in dem Datensatz würde das ganz prima funktionieren - im vorliegenden Fall leider nicht. Was Sie aber wieder sehen können, ist dass R per default bereits eine Farbskala gewählt hat und eine Legende hinzugefügt hat. Wie wir später noch sehen werden lassen sich natürlich auch Farbe und Legende noch anpassen - jetzt versuchen wir aber erstmal die Ländernamen auf eine andere Weise abzubilden. Dazu verwenden wir diesmal das Arguemnt "label" innerhalb der Funktion aes(). Wenn wir dann das Streudiagramm neu erstellen, passiert erstmal... -->
-
-<!-- ```{r} -->
-<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, label = ccodealp)) -->
-<!-- p + geom_point()  -->
-
-
-<!-- ``` -->
-<!-- ...nichts, da das Arguemnt "label" alleine für die Punktdarstellung keine Konsequenzen hat. Fügen wir aber nun das geom "label" hinzu, werden die Punkte "gelabelt" - oder eben benannt: -->
-
-<!-- ```{r} -->
-<!-- p + geom_point() +  -->
-<!--   geom_label() -->
-<!-- ``` -->
-<!-- Hier wurden nun "Labels" erstellt die ein wenig an bedruckte Etiketten erinnern. Aufgrund der großen Anzahl an Ländern ist auch dies nun wenig hilfreich, wenngleich zumindest einzelne Länder nun einfacher zu erkennen sind. Eine mögliche Alternative bestünde nun darin, das geom "text" zu verwenden, wodurch nur der Text dargestellt wird - ohne eine Umrandung und Einfärbung:  -->
-
-<!-- ```{r} -->
-<!-- p +  -->
-<!--   #geom_point() +  -->
-<!--   geom_text() -->
-<!-- ``` -->
-<!-- Auch noch nicht so viel besser. Letzter Versuch: Die Verwendung des Pakets ggrepel - einer Erweitwerung von ggplot, das Labels erstellt, die sich gegenseitig nicht überlappen sollen: -->
-
-<!-- ```{r} -->
-<!-- library(ggrepel) -->
-
-<!-- # p + geom_point() +  -->
-<!--   #geom_text_repel(max.overlaps = 100) -->
-<!--   # geom_label_repel() -->
-<!-- ``` -->
-<!-- Okay, auch das funktioniert nicht. Es sind einfach zu viele Datenpunkte auf der Abbildung. Dennoch haben Sie nun mehrere nützliche Möglichkeiten gesehen, die sie verwenden könnten, wenn Sie etwas weniger Daten in ihrem Datensatz haben. Für den vorliegenden Fall ist es vermutlich sinnvoller, nicht nach einzelnen Ländern sondern nach anderen Merkmalen zu unterscheiden. Gibt es Variablen in unseren Daten, die sinnvollerweise auf die Farbästhetik abgebildet werden können? Wir könnten beispielsweise versuchen, die Datenpunkte nach dem Kontinent einzufärben, auf dem sich die jeweiligen Länder befinden: -->
-
-<!-- ```{r} -->
-<!-- # p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, colour = continent)) -->
-<!-- # p + geom_point()  -->
-<!-- ``` -->
-
-<!-- Hier wurden nun die einzelnen Datenpunkte nach Kontinenten eingefärbt, und eine Legende mit einem Schlüssel zu den Farben wurde automatisch hinzugefügt. Das sieht schon sehr viel besser und handlicher aus. Und: Jetzt können Sie sich wieder auf die Suche nach einem Muster machen - beispielsweise clustern die afrikanischen Länder (rot) erkennbar links unten und die europäischen Länder rechts oben.  -->
-
-<!-- Eine weitere Möglichkeit bestünde darin, di             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))e Größe der Länder noch  -->
-
-
-<!-- ```{r} -->
-<!-- # p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, color = continent)) -->
-<!-- # p + geom_point() + -->
-<!-- #   scale_size(name   = "Einwohnerzahl", -->
-<!-- #              breaks = c(1000000, 10000000, 100000000, 1000000000), -->
-<!-- #              labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio.")) -->
-<!-- ``` -->
 
 <!-- ## Mapping vs. Setting -->
 
@@ -530,69 +677,56 @@ All' das werden wir uns in den kommenden Videos anschauen - für heute würde ic
 <!-- p + geom_point(size = 4, color = "blue", alpha = 0.5)  -->
 <!-- ``` -->
 
-<!-- Verwenden Sie zum Beispiel das Argument alpha um die Transparenz Ihrer Objekte zu steuern. Dabei können sie Werte zwischen 0 und 1 setzen. Ein Objekt mit einem Alpha-Wert von Null ist vollständig transparent. Ein Objekt mit einem Alpha von eins ist vollständig undurchsichtig. Die Verwendung von Transparenten Objekten iust dabei übrigens nicht nur eine graphische Spielerei, vielmehr können transparente Objekte sehr nützlich sein, wenn viele sich Punkte oder Objekte überlappen - wenn es also zum sog. Overplotting kommt. Sie können durch eine sehr hohe TRansparenz so zum Beispiel Ballungen in den den Daten leichter erkennen - wie z.B. so: -->
 
-<!-- ```{r} -->
-<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp)) -->
-<!-- p + geom_point(color = "black", alpha = 0.1)  -->
-<!-- ``` -->
-
-
-
-
-<!-- ```{r} -->
-<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, fill = continent)) -->
-<!-- p + geom_point(shape = 21, alpha = 0.7) + -->
-<!--   scale_x_continuous(limits = c(0, 12),  -->
-<!--                      breaks = seq(0, 13, 2)) +  -->
-<!--   scale_y_continuous(limits = c(50, 85),  -->
-<!--                      breaks = seq(50, 90, 5)) + -->
-<!--   scale_size(name   = "Einwohnerzahl", -->
-<!--              breaks = c(1000000, 10000000, 100000000, 1000000000), -->
-<!--              labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio.")) +  -->
-<!--   labs(x = "Gesundheitsausgaben in Prozent",  -->
-<!--        y = "Lebenserwartung",  -->
-<!--        size = "Einwohnerzahl", -->
-<!--        fill = "Kontinent",  -->
-<!--        title = "Überschrift",  -->
-<!--        subtitle = "Unterüberschrift",  -->
-<!--        caption = "Quelle: QOG") + -->
-<!--   theme_minimal() -->
+```{r}
+# p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp))
+# p + geom_point(color = "black", alpha = 0.1)
+```
 
 
 
 
-<!-- ``` -->
+```{r}
+# p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, fill = continent))
+# p + geom_point(shape = 21, alpha = 0.7) +
+#   scale_x_continuous(limits = c(0, 12),
+#                      breaks = seq(0, 13, 2)) +
+#   scale_y_continuous(limits = c(50, 85),
+#                      breaks = seq(50, 90, 5)) +
+#   scale_size(name   = "Einwohnerzahl",
+#              breaks = c(1000000, 10000000, 100000000, 1000000000),
+#              labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio.")) +
+#   labs(x = "Gesundheitsausgaben in Prozent",
+#        y = "Lebenserwartung",
+#        size = "Einwohnerzahl",
+#        fill = "Kontinent",
+#        title = "Überschrift",
+#        subtitle = "Unterüberschrift",
+#        caption = "Quelle: QOG") +
+#   theme_minimal()
+# 
 
-<!-- p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, colour = continent,   fill = continent)) -->
-<!-- p + geom_point(alpha = 0.7) + -->
-<!--   scale_x_continuous(limits = c(0, 12),  -->
-<!--                      breaks = seq(0, 13, 2)) +  -->
-<!--   scale_y_continuous(limits = c(50, 85),  -->
-<!--                      breaks = seq(50, 90, 5)) + -->
-<!--   scale_size(name   = "Einwohnerzahl", -->
-<!--              breaks = c(1000000, 10000000, 100000000, 1000000000), -->
-<!--              labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio.")) +  -->
-<!--   labs(x = "Gesundheitsausgaben",  -->
-<!--        y = "Lebenserwartung",  -->
-<!--        size = "Einwohnerzahl", -->
-<!--        fill = "Kontinent",  -->
-<!--        title = "Überschrift",  -->
-<!--        subtitle = "Unterüberschrift",  -->
-<!--        caption = "Quelle: QOG") -->
+# p <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, colour = continent,   fill = continent))
+# p + geom_point(alpha = 0.7) +
+#   scale_x_continuous(limits = c(0, 12),
+#                      breaks = seq(0, 13, 2)) +
+#   scale_y_continuous(limits = c(50, 85),
+#                      breaks = seq(50, 90, 5)) +
+#   scale_size(name   = "Einwohnerzahl",
+#              breaks = c(1000000, 10000000, 100000000, 1000000000),
+#              labels = expression("< 1 Mio.", "1-10 Mio.", "10-100 Mio.", "> 100000 Mio.")) +
+#   labs(x = "Gesundheitsausgaben",
+#        y = "Lebenserwartung",
+#        size = "Einwohnerzahl",
+#        fill = "Kontinent",
+#        title = "Überschrift",
+#        subtitle = "Unterüberschrift",
+#        caption = "Quelle: QOG")
 
 
 
-<!-- ^```{r} -->
-<!-- p <- ggplot(data = gapminder, mapping = aes(x = gdpPercap, y=lifeExp)) -->
-<!-- p + geom_point(alpha = 0.3) + -->
-<!-- geom_smooth(method = "gam") + -->
-<!-- scale_x_log10(labels = scales::dollar) + -->
-<!-- labs(x = "GDP Per Capita", y = "Life Expectancy in Years", -->
-<!-- title = "Economic Growth and Life Expectancy", -->
-<!-- subtitle = "Data points are country-years", -->
-<!-- caption = "Source: Gapminder.") -->
-<!-- ``` -->
+
+```
 
 <!-- Jetzt können wir ein einigermaßen ausgefeiltes Diagramm erstellen. Wir setzen die Alpha der Punkte auf einen niedrigen Wert, machen schönere x- und y-Achsenbeschriftungen, und fügen einen Titel, einen Untertitel und eine Beschriftung hinzu. Wie Sie im Code sehen können zu sehen ist, werden zusätzlich zu x , y und anderen ästhetischen Zuordnungen in (z. B. Größe, Füllung oder Farbe) kann die Funktion labs() auch den Text für Titel, Untertitel und Beschriftung festlegen. Sie steuert die Hauptbeschriftungen der Skalen. Das Aussehen von Dingen wie Achsentick- ist Aufgabe verschiedener scale_-Funktionen, wie z. B. der Funktion scale_x_log10() Funktion, die hier verwendet wird. Wir werden mehr darüber erfahren was mit scale_ Funktionen gemacht werden kann. Gibt es Variablen in unseren Daten, die sinnvollerweise auf die Farbästhetik abgebildet werden können? auf die Farbästhetik abgebildet werden können? Nehmen wir den Kontinent. In Abbildung 3.14 sind die wurden die einzelnen Datenpunkte nach Kontinenten eingefärbt, und eine Legende mit einem Schlüssel zu den Farben wurde automatisch in die der Darstellung hinzugefügt. Außerdem haben wir jetzt statt einer Glättungslinie fünf. Es gibt eine für jeden einzelnen Wert der Kontinentvariable. Dies ist eine Folge der Art und Weise, wie ästhetische Zuordnungen inhärent sind. tung. Zusammen mit x und y wird die ästhetische Farbzuordnung in Aufruf von ggplot() festgelegt, mit dem wir das p-Objekt erstellt haben. Wenn nicht anders angegeben -->
 <!-- werden alle Geoms, die auf das ursprüngliche Plot-Objekt gelegt werden die Mappings dieses Objekts übernehmen. In diesem Fall erhalten wir sowohl unsere Punkte und Glättungen nach Kontinenten gefärbt. -->
@@ -979,3 +1113,25 @@ All' das werden wir uns in den kommenden Videos anschauen - für heute würde ic
 ```
 
 
+<!-- Tipps  -->
+
+<!-- Doch kommen wir nochmal für ein etwas spezielleres Beispiel zurück auf die verschiedenen `scale()`-Funktionen. Bisher haben wir nur lineare Skalen verwendet, in einigen Fällen kann es durchaus sinnvoll sein eine lineare Skala in eine logarithmische Skala umzuwandeln. Auch das geht mit ggplot2 ziemlich fix und zwar mit einer Funktion namens `scale_x_log10()`. Diese skaliert die x-Achse eines Diagramms auf der Basis des Zehnerlogarithmus. m sie zu verwenden, fügen wir sie einfach zum Diagramm hinzu. -->
+
+<!-- An dieser Stelle ein kleiner Praxistipp: Zum herumexperimentieren bietet es sich an, einzelne Codeschnipsel nicht gleich zu löschen oder zu überschreiben, sondern "auzukommentieren". Indem Sie eine Raute vor bestimmte Code-Elemente setzen bringen Sie R dazu, diese Elemente als Kommentar zu behandeln und eben nicht auszuführen. So können Sie schnell und einfach verschiedene Darstellungsvarianten ausprobieren ohne jedesmal viel Schreibarbeit zu haben. Wenn Sie mehrere Zeilen gleichzeitig auskommentieren wollen müssen Sie übrigens nicht händisch vor jede Zeile eine Raute schreiben, vielmehr können Sie dafür die betreffenden Zeilen mit der Maus oder der Tastatur markieren und dann mit dem Tastenkürzel Umschalt+Steuerung+c die Zeilen Auskommentieren (und wieder zurückbringen). Ich zeige Ihnen das mal anhand dieses Beispiels -->
+
+
+
+<!-- ```{r} -->
+
+<!-- p + geom_point() + -->
+<!--   scale_x_continuous(limits = c(0, 13), -->
+<!--                      breaks = seq(0, 13, 2)) + -->
+<!--   # scale_x_log10() + -->
+<!--   scale_y_continuous(limits = c(50, 90), -->
+<!--                      breaks = seq(50, 90, 5)) + -->
+<!--   labs(x = "Gesundheitsausgaben", -->
+<!--        y = "Lebenserwartung", -->
+<!--        title = "Überschrift", -->
+<!--        subtitle = "Unterüberschrift", -->
+<!--        caption = "Quelle: QOG") -->
+<!-- ``` -->

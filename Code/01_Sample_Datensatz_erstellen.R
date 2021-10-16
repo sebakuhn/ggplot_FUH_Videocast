@@ -128,8 +128,11 @@ qog_ts %>%
 
 ## Bearbeiteten Datensatz speichern
 readr::write_csv(qog, "Data/qog_sample.csv")
+save(qog, file = "Data/qog_sample.rdata")
 rm(qog)
 
 readr::write_csv(qog_ts, "Data/qog_ts_sample.csv")
+save(qog, file = "Data/qog_ts_sample.rdata")
 rm(qog_ts)
+
 
