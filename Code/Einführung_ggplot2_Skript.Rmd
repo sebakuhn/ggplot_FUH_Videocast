@@ -645,6 +645,367 @@ Jetzt haben wir ein einigermaßen ausgefeiltes Diagramm erstellt, das sich - zum
 
 
 
+### Teil 4
+
+In den letzten beiden Tutorials hatten wir uns intensiv mit Streudiagrammen beschäftigt. In diesem Teil des Tutorials werden wir uns eine Reihe anderer Darstellungsformen anschauen, die `ggplot` für uns bereithält. Sie werden sehen, dass sich an der Grundlogik des Codes nicht viel ändert - sie müssen nur eben (ganz im Sinne der Grammar of Graphics) sozusagen neue "Vokabeln" lernen.
+
+Wie beim letzten mal ist auch diesmal der Datensatz bereits geladen und wir laden das Paket `ggplot` wieder mit dem üblichen Befehl:
+
+```{r}
+## Wichtige Pakete laden und Datensatz importieren
+library(tidyverse) # lädt alle Pakete des "tidyverse" - unter anderem ggplot2 und readr
+
+# Verwenden Sie bitte den Auszug aus dem QOG-Datensatz - beispielsweise mit 
+# qog <- read.csv("./Data/qog_sample.csv") # Laufwerk und Verzeichnis anpassen
+# oder
+# qog <- load("./Data/qog_sample.rdata") # Laufwerk und Verzeichnis anpassen
+```
+
+Wir hatten uns ja in den letzten beiden Teilen vor allem mit einem möglichen Zusammenhang zwischen den staatlichen Gesundheitsausgaben in einem Land und der Lebenserwartung beschäftigt. Bevor Zusammenhänge dieser Art zwischen zwei oder mehr Variablen untersucht werden, macht es in der Regel Sinn, sich die einzelnen Variablen einmal näher anzuschauen - und deshalb bleiben wir noch einen Moment bei der Variable der "Lebenserwartung". Schauen wir uns dazu einmal die Häufigkeitsverteilung der Lebenserwartung für die Staaten an, für die Daten vorliegen. Dazu bietet sich natürlich ein Histogramm an. Ein solches Histogramm zu erstellen ist mit `ggplot` relativ simpel. Sie geben wieder an, welchen Datensatz Sie verwenden wollen und übergeben im Mapping-Argument - also in der aes()-Funktion - nur eine Variable; in diesem Fall die Variable "wdi_lifexp" für die "Lebenserwartung". Danach lassen Sie sich mit der Funktion `geom_histogramm()` ein Histogramm ausgeben:
+
+```{r}
+# Häufigkeitsverteilung der Variable "Lebenserwartung" (Histogramm)
+p <- ggplot(qog, aes(x = wdi_lifexp))
+p + geom_histogram()
+```
+
+Wie Sie vermutlich wissen, fassen Histogramme kontinuierliche Variable zusammen, indem sie die Daten in Segmente bzw. Klassen oder sogenannte "Bins" unterteilt und dann zählt, wie viele Beobachtungen sich in jedem Bin befinden. Für die Frage, in wie viele solcher Bins die Daten eingeteilt werden sollen, gibt es keine klare Regel - das obliegt im Prinzip Ihrer Entscheidung. Ohne eine dezidierte Angabe wählt die Funktion `geom_histogram()` automatisch auf Basis von Faustregeln eine - in der Regel passende - Bin-Größe für uns aus. 
+
+Da wir im Befehl oben keine Festlegung getroffen haben, hat `ggplot` diese Entscheidung für uns getroffen und 30 solcher Bins erstellt. Sie müssen die einzelnen Bins natürlich nicht zählen um das herauszufinden - vielmehr können Sie dazu auch die Meldung in der Console konsultieren - dort erhalten Sie die Info, dass die Funktion `stat_bin()` hinter den Kulissen dreißig Bins ausgewählt hat. Darüber hinaus erhalten Sie eine Fehlermeldung, wonach anscheinend einige Länder aufgrund fehlender Werte ausgeschlossen wurden. Diese Meldung ignoriere ich hier, da es mir nur um die Darstellung mit `ggplot` geht.
+
+Beim Zeichnen von Histogrammen lohnt es sich, etwas mit der Anzahl an Bins zu experimentieren - und das wollen wir im Folgenden auch tun - und zwar mit dem Argument "bins =", dem Sie dann die gewünschte Anzahl an Segmenten übergeben, in die die Daten aufgeteilt werden. Um diese Segmente dann noch etwas besser voneinander unterschieden zu können, legen wir in der Funktion "geom_histogram()" unterschiedliche Farben für die Füllung und die Randfarbe der "bins" fest. Beachten Sie hier, dass R eine Reihe "gängiger" Farben einfach sozusagen namentlich kennt, Sie müssen dem "color=" und dem "fill="-Argument also nur die englische Bezeichnung der gewünschten Farben übergeben. Darüber hinaus können Sie beispielsweise auch mit Hexadezimalen Farbdefinitionen arbeiten - wie im dritten Code-Beispiel unten geschehen. Dazu nutzen Sie am besten einen der zahlreichen Color-Pickers, die sich im Internet leicht finden lassen
+
+```{r}
+# Häufigkeitsverteilung der Variable "Lebenserwartung" (Histogramm)
+p + geom_histogram(color = "black", fill = "white") #Variante mit 30 bins (automatisch von ggplot festgelegt) und in schwarz/weiß
+p + geom_histogram(bins = 20,
+                   color = "darkgrey", fill = "Cyan") #20 bins mit den Farben "Cyan" (blau/grün) und einem dunklen Grau
+p + geom_histogram(bins = 10,
+                   color = "#000000", fill = "#FF0000") #10 bins, #000000 ist der Hex-Code für "schwarz" und "#FF0000" für "rot"
+
+```
+
+Für die Visualisierung solcher Häufigkeiten von Variablen existieren neben dem Histogramm natürlich noch andere Darstellungsmöglichkeiten - beispielsweise können Sie mit der Funktion `geom_density()` auch eine Dichte-Schätzung der zugrunde liegenden Verteilung darstellen, mit `geom_area()` erhalten Sie - wenn sie als stat-Argument "bin" festlegen eine ähnliche Darstellung zum Histogramm, nur dass hier eben eine Fläche eingefüllt wird. Das bietet sich ggf. an, wenn Sie hier mehrere Variablen verwenden wollen. Ganz ähnlich verhält es sich mit der Funktion `geom_freqpoly()` durch die Sie die Häufigkeiten als Polygone dargestellt bekommen. Zuletzt möchte ich Ihnen noch kurz die Funktion `geom_dotplot()` zeigen, die den Vorteil bietet, dass jeder Punkt einer Beobachtung - in unserem Fall also einem Land - entspricht.
+
+```{r}
+p + geom_density()
+p + geom_area(stat = "bin", binwidth = 1)
+p + geom_freqpoly()
+p + geom_dotplot(fill = "white", color = "black")
+```
+
+
+
+```{r}
+p <- ggplot(qog, aes(x = continent)) 
+p + geom_bar()
+
+p <- ggplot(qog, aes(x = continent, fill = continent)) 
+p + geom_bar() + 
+  guides(fill = FALSE)
+
+
+
+p + geom_bar(mapping = aes(y = ..prop.., group = 1)) + 
+  guides(fill = FALSE) + 
+  coord_polar()
+
+
+p <- ggplot(qog, aes(x = continent, fill = continent)) 
+p + geom_bar() + 
+  guides(fill = FALSE) + 
+  coord_polar()
+
+
+```
+
+```{r}
+p <- ggplot(qog, aes(x = continent, fill = as.factor(ht_colonial))) 
+
+p + geom_bar()
+p + geom_bar(position = "dodge")
+
+```
+
+
+
+
+
+
+Natürlich lassen sich auch diese Darstellungen wieder kombinieren - häufig sieht man beispielsweise Kombinationen aus Histogrammen mit Linien aus einer Dichte-Schätzung. Wenn Sie allerdings Darstellungen kombinieren möchten, die eine unterschiedliche Achsenskalierung voraussetzen, dann müssen Sie dies separat berücksichtigen. 
+
+
+```{r}
+p + geom_histogram(binwidth = 1, 
+                   fill = "lightgrey", color = "blue") +
+  geom_density(size = 2, color = "skyblue")
+
+p + geom_histogram(binwidth = 1, 
+                   aes(y=..density..),
+                   fill = "lightgrey", color = "blue") +
+  geom_density(size = 2, color = "skyblue")
+```
+
+
+
+Auch hier können wir Farbe (für die Linien) und Füllung (für den Körper der Dichtekurve) verwenden. Diese Figuren sehen oft recht hübsch aus. Aber wenn es mehrere gefüllte Bereiche auf dem Diagramm gibt, wie in diesem Fall, kann die Überlappung schwer zu lesen sein. (Die Abbildungen 4.18 und 4.19 sind Beispiele dafür.) Wenn Sie die Grundlinien der Dichtekurven verschwinden lassen möchten, können Sie stattdessen geom_line(stat = "density") verwenden. Damit entfällt auch die Möglichkeit, die ästhetische Füllung zu verwenden. Dies kann jedoch
+in einigen Fällen eine Verbesserung sein. Probieren Sie es mit der Darstellung von Zustandsflächen aus und sehen Sie, wie sie sich vergleichen.
+
+Genau wie bei geom_bar() werden die zählungsbasierten Standardwerte von den stat_-Funktionen, die von geom_histogram() und geom_ density() verwendeten stat_-Funktionen berechnet werden, proportionale Maße zurück, wenn wir sie danach fragen.
+Für geom_density() kann die stat_density()-Funktion ihre Standard-Statistik ..density.. zurückgeben, oder ..scaled.., was eine proportionale Dichteschätzung liefert. Sie kann auch eine Statistik namens
+
+Übersetzt mit www.DeepL.com/Translator (kostenlose Version)
+
+
+```{r}
+
+
+
+
+p <- ggplot(qog, aes(x = continent, color = wdi_lifexp))
+p + geom_bar()
+
+g <- ggplot(qog_ts, aes(x = year, y = gle_gdp))
+g <- ggplot(qog, aes(x = cname, y = ffp_sl, color = cname))
+
+g + geom_point()
+
+g <- ggplot(qog_ts, aes(x = year, y = wdi_hwf, color = cname))
+g <- ggplot(qog, aes(y = wdi_incsh10h, x = who_let))
+g + geom_point()
+
+
+g <- ggplot(qog, aes(x = wdi_chexppgdp, y = wdi_lifexp))
+g + geom_point()
+
+g <- ggplot(qog, aes(x = wdi_chexppgdp, y = wdi_lifexp))
+g + geom_point()
+
+
+
+g <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, color = continent))
+g + geom_point()
+
+g <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+
+summary(qog$wdi_pop)
+
+g <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, size = wdi_pop, shape = continent))
+g + geom_point()
+
+
+g <- ggplot(qog, aes(x = wdi_dgovhexp, y = wdi_lifexp, color = continent))
+g + geom_text(label = qog$ccodealp)
+
+
+p <- ggplot(qog, aes(x = wdi_lifexp))
+
+
+
+
+
+qog_sum <-
+qog %>%
+  select(wdi_dgovhexp, wdi_lifexp, wdi_pop, continent) %>%
+  group_by(continent) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+
+p <- ggplot(qog_sum, aes(y=wdi_lifexp, x = continent))
+p + geom_bar(stat = "identity")
+
+p <- ggplot(qog, aes(x=wdi_lifexp, fill = continent))
+p + geom_bar(position = "dodge")
+p + geom_bar(position = "stack")
+p + geom_bar(position = "fill")
+
+
+p <- ggplot(qog, aes(y=wdi_lifexp, x = continent))
+
+p + geom_boxplot()
+
+p + geom_violin()
+
+p + geom_violin() + geom_boxplot(alpha=0.5)
+
+p + geom_violin() + geom_point()
+
+p + geom_violin() + geom_jitter(width = 0.1)
+
+p + geom_boxplot() + geom_jitter(width = 0.1)
+
+
+p <- ggplot(qog_ts, aes(x=year,  y=wdi_lifexp))
+
+p + geom_line() +
+  facet_wrap(~ccodealp)
+
+
+
+
+p + geom_path() +
+  facet_wrap(~continent)
+
+qog_ts_sum <-
+qog_ts %>%
+  select(year, wdi_dgovhexp, wdi_lifexp, wdi_pop, ht_region, continent) %>%
+  group_by(year, continent) %>%
+  summarise_if(is.numeric, mean, na.rm = TRUE)
+
+
+p <- ggplot(qog_ts_sum, aes(x=year,  y=wdi_lifexp))
+p + geom_line() +
+  facet_wrap(~continent)
+
+
+qog_ts %>%
+  filter(continent == "Africa") %>%
+  ggplot(., aes(x=year,  y=wdi_lifexp)) +
+  #geom_point(size = 0.5) +
+  geom_line() +
+  facet_wrap(~ccodealp)
+
+
+
+head(qog)
+
+qog$con
+
+```
+
+
+https://www.draliceevans.com/post/how-did-east-asia-overtake-south-asia
+
+
+qog$ht_region
+
+State Legitimacy (ffp_sl)
+Corruption Perceptions Index (ti_cpi)
+Political corruption index (vdem_corr)
+Overall Global Gender Gap Index (gggi_ggi)
+Urban population (% of total population) (wdi_popurb)
+Rural population (% of total population) (wdi_poprul)
+Post-Materialist index 12-item (wvs_pmi12)
+Post-Materialist index 4-item (wvs_pmi4)
+Autonomy Index (wvs_auton)
+Emancipative Values: Autonomy Component (wel_evau)
+Emancipative Values: Choice Component (wel_evch)
+Emancipative Values Index (wel_evi)
+Emancipative Values: Voice Component (wel_evvo)
+Political Terror Scale - Amnesty International (gd_ptsa)
+Political Terror Scale - Human Rights Watch (gd_ptsh)
+Percentage with No Schooling, Female and Male (bl_lumf)
+Literacy rate, adult total (% of people ages 15 and above) (wdi_litrad)
+Adjusted net enrollment rate, primary (% of primary school children) (wdi_nerpr)
+Access to electricity (% of population) (wdi_acel)
+Access to electricity, rural (% of rural population) (wdi_acelr)
+Access to electricity, urban (% of urban population) (wdi_acelu)
+Alternative and nuclear energy (% of total energy use) (wdi_ane)
+Internet users. % pop. (wef_iu)
+Current health expenditure (% of GDP) (wdi_chexppgdp)
+Human Development Index (undp_hdi)
+People with basic handwashing facilities (% of populartion) (wdi_hwf)
+People with basic handwashing facilities, rural (% of rural population) (wdi_hwfr)
+People with basic handwashing facilities, urban (% of urban population) (wdi_hwfu)
+Alcohol consumption per capita (who_alcohol10)
+Healthy Life Expectancy, Female (who_halef)
+Healthy Life Expectancy, Male (who_halem)
+Healthy Life Expectancy, Total (who_halet)
+Life Expectancy, Female (who_lef)
+Life Expectancy, Male (who_lem)
+Life Expectancy, Total (who_let)
+State of health (subjective) (wvs_subh)
+Colonial Origin (ht_colonial)
+Real GDP per Capita (year 1600) (mad_gdppc1600)
+Real GDP per Capita (year 1700) (mad_gdppc1700)
+Real GDP per Capita (year 1900) (mad_gdppc1900)
+Rule of law sub-index (aii_rol)
+Rule of Law (bti_rol)
+Eective Number of Electoral Parties (gol_enep)
+Index of Democratization (van_index)
+Democratic Breakdown (bnr_dem)
+Approval of Democracy (bti_aod)
+Democracy Status (bti_ds)
+Quality of Democracy (sgi_qd) 493
+Index of Democratization (van_index) 530
+Liberal democracy index (vdem_libdem) 537
+Eective Democracy Index (wel_edi) 641
+Political system: Having a democratic political system (wvs_psdem) 670
+Real GDP (2005) (gle_gdp) 304
+Real GDP per Capita (2005) (gle_rgdpc) 305
+Gini Coecient (lis_gini) 393
+Mean Equivalized Income (lis_meaneqi) 394
+Real GDP per Capita (mad_gdppc) 399
+Real GDP at constant 2017 national prices (in mil. 2017US dollar) (pwt_rgdp) 476
+GDP per capita (constant 2010 US dollar) (wdi_gdpcapcon2010)
+GDP per capita, PPP (constant 2017 international dollar) (wdi_gdpcappppcon2017)
+GDP, PPP (constant 2017 international dollar) (wdi_gdppppcon2017)
+Income share held by highest 10% (wdi_incsh10h) 587
+Scientic publications. H Index (wef_sp) 636
+Expenditure on health, as % of total gen. gov. exp. (gfs_heal) 300
+
+
+g <- ggplot(qog, aes(x = van_index, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+g <- ggplot(qog, aes(x = wbgi_pve	, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+
+g <- ggplot(qog, aes(x = gd_ptsh, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+g <- ggplot(qog, aes(x = gd_ptsa, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+
+
+g <- ggplot(qog, aes(x = ht_colonial, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+
+g <- ggplot(qog, aes(x = wdi_hwf, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+
+g <- ggplot(qog, aes(x = wdi_gdpcapcon2010, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+
+g <- ggplot(qog, aes(x = wdi_gdppppcon2017, y = wdi_lifexp, size = wdi_pop, fill = continent))
+g + geom_point(shape = 21) +
+  scale_size(name   = "qsec",
+             breaks = c(1000000, 10000000, 100000000, 1000000000),
+             labels = expression("< 1 Mio.", "bis 10 Mio.", "< 100 Mio.", ""))
+
+
+
+
 <!-- ## Mapping vs. Setting -->
 
 <!-- Kommen wir nun zu einer wichtigen Unterscheidung - und zwar der Unterscheidung zwischen einem ästhetischen "Mapping" und einer fixen Einstellung. Wie wir gesehen haben, können wir beispielsweise mit einem Mapping innherhalb der aes()-Funktion eine Variable durch ein bestimmtest visuelles Element wie Größe, Farbe oder Form darstellen. Schauen wir uns diesen Code nochmals an: -->
