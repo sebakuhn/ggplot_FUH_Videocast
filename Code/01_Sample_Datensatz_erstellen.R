@@ -10,7 +10,7 @@ library(countrycode)
 library(tidyverse)
 
 ## QOG-Daten importieren
-qog <- readr::read_csv("https://www.qogdata.pol.gu.se/data/qog_std_cs_jan21.csv") #Standard-Datensatz
+qogx <- readr::read_csv("https://www.qogdata.pol.gu.se/data/qog_std_cs_jan21.csv") #Standard-Datensatz
 qog_ts <- readr::read_csv("https://www.qogdata.pol.gu.se/data/qog_std_ts_jan21.csv") #Zeitreihen-Datensatz
 
 ## Informationen zu den Kontinenten zum Datensatz hinzufügen
